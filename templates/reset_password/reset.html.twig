@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>New Password</title>
+</head>
+<body style="font-family: sans-serif; padding: 20px;">
+
+<h1>Create a new password</h1>
+
+{#
+Architecture HTTP et Sécurité :
+Le formulaire n'ayant pas d'attribut 'action', la requête POST sera envoyée vers l'URL courante.
+C'est un design pattern crucial ici, car notre URL contient le token cryptographique
+(/reset-password/{token}). Notre ResetPasswordController pourra ainsi vérifier
+la légitimité du token en même temps qu'il traite le payload contenant le nouveau mot de passe.
+#}
+<form method="post">
+    <div>
+        <label for="password">New password:</label>
+
+        {#
+        Politique de sécurité (Password Policy) et Couplage :
+        L'attribut name="password" est la clé attendue par $request->request->get('password') dans le contrôleur.
+        L'attribut 'minlength="6"' ajoute une première ligne de défense côté client (Front-end validation).
+        Cela empêche l'envoi de requêtes réseau inutiles si l'utilisateur tape un mot de passe
+        trivialement court. En production, on ajouterait évidemment des assertions Regex complexes côté Backend.
+        #}
+        <input type="password" name="password" id="password" required autofocus minlength="6">
+    </div>
+    <br>
+
+    {#
+    Point de non-retour : Ce bouton déclenche la phase de mutation d'état (State Mutation).
+    Le mot de passe transitera en clair (il est impératif d'avoir un certificat SSL/HTTPS en production),
+    sera intercepté par notre contrôleur, passé à la fonction de hachage (ex: Argon2id),
+    et remplacera définitivement l'ancien hash dans notre base de données.
+    Le jeton à usage unique sera ensuite purgé.
+    #}
+    <button type="submit">Save password</button>
+</form>
+
+</body>
+</html>

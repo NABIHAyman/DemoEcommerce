@@ -1,39 +1,84 @@
+# Configuration principale de la sécurité de l'application
 security:
-    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
+    # --- MATRICE DES PERMISSIONS (RBAC) ---
+    role_hierarchy:
+        ROLE_ADMIN: ROLE_USER
+
+    # 1. GESTION DU HACHAGE DES MOTS DE PASSE
+    # Symfony ne stocke JAMAIS de mots de passe en clair.
+    # L'option 'auto' demande à Symfony de choisir lui-même l'algorithme le plus sécurisé
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
-    # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
+
+    # 2. FOURNISSEUR D'UTILISATEURS (USER PROVIDERS)
+    # Définit comment Symfony va chercher les données de l'utilisateur pour vérifier ses identifiants.
     providers:
-        users_in_memory: { memory: null }
+        app_user_provider:
+            # On utilise Doctrine pour interroger la base de données.
+            entity:
+                # La classe de l'entité qui représente nos utilisateurs.
+                class: App\Entity\User
+                # Le champ unique qui sert d'identifiant pour la connexion (le login).
+                property: email
+
+    # 3. LES PARE-FEUX (FIREWALLS)
+    # C'est ici qu'on définit les zones de l'application qui sont protégées.
     firewalls:
+        # Zone de développement : on désactive la sécurité pour les outils de debug
+        # (profiler, barre de debug, images, assets JS/CSS) afin d'éviter d'être bloqué.
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+
+        # Pare-feu principal : il gère la majorité de l'application.
         main:
+            # 'lazy: true' signifie que Symfony ne démarre la session que si l'application
+            # a réellement besoin de vérifier si l'utilisateur est connecté (optimise les performances).
             lazy: true
-            provider: users_in_memory
+            # On indique quel provider utiliser pour ce firewall.
+            provider: app_user_provider
 
-            # activate different ways to authenticate
-            # https://symfony.com/doc/current/security.html#the-firewall
+            # --- AUTHENTICATION PAR FORMULAIRE (TWIG) ---
+            # Active le mécanisme d'authentification standard via un formulaire HTML.
+            form_login:
+                # La route qui affiche le formulaire de connexion.
+                login_path: app_login
+                # La route vers laquelle le formulaire est envoyé (gérée nativement par Symfony).
+                check_path: app_login
+                # Active la protection contre les failles CSRF (Cross-Site Request Forgery).
+                enable_csrf: true
+                # Redirection automatique vers cette route après une connexion réussie.
+                default_target_path: app_products
 
-            # https://symfony.com/doc/current/security/impersonating_user.html
-            # switch_user: true
+            # --- GESTION DE LA DÉCONNEXION ---
+            # Définit comment l'utilisateur peut quitter sa session.
+            logout:
+                # La route qui déclenche la déconnexion.
+                path: app_logout
+                # Où renvoyer l'utilisateur une fois qu'il est déconnecté.
+                target: app_login
 
-    # Easy way to control access for large sections of your site
-    # Note: Only the *first* access control that matches will be used
+    # 4. CONTRÔLE D'ACCÈS (ACCESS CONTROL)
+    # C'est ici qu'on définit les règles de filtrage par URL.
+    # Attention : la première règle qui correspond est la seule appliquée.
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        # PUBLIC_ACCESS : On permet à tout le monde d'accéder à la page de login,
+        # sinon on aurait une boucle de redirection infinie.
+        - { path: ^/login, roles: PUBLIC_ACCESS }
 
+        # ROLE_USER : Toutes les URLs commençant par /products demandent au minimum
+        # que l'utilisateur soit authentifié et possède le rôle de base.
+        - { path: ^/products, roles: ROLE_USER }
+
+# CONFIGURATION SPÉCIFIQUE POUR LES TESTS UNITAIRES ET FONCTIONNELS
+# On réduit au maximum la puissance du hachage pour accélérer l'exécution des tests.
 when@test:
     security:
         password_hashers:
-            # By default, password hashers are resource intensive and take time. This is
-            # important to generate secure password hashes. In tests however, secure hashes
-            # are not important, waste resources and increase test times. The following
-            # reduces the work factor to the lowest possible values.
+            # On utilise des valeurs minimales (cost, time, memory) pour que les tests
+            # ne prennent pas 10 secondes à chaque création d'utilisateur factice.
             Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
                 algorithm: auto
-                cost: 4 # Lowest possible value for bcrypt
-                time_cost: 3 # Lowest possible value for argon
-                memory_cost: 10 # Lowest possible value for argon
+                cost: 4
+                time_cost: 3
+                memory_cost: 10

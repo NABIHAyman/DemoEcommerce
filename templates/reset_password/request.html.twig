@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Forgot Password</title>
+</head>
+<body style="font-family: sans-serif; padding: 20px;">
+
+<h1>Forgot Password?</h1>
+
+{#
+Concept d'UX (User Experience) et de sécurité :
+On explique clairement l'action attendue. Le message reste générique pour ne pas
+divulguer de règles métier complexes à un attaquant potentiel.
+#}
+<p>Enter your email address. We will send you a link to reset your password.</p>
+
+{#
+Architecture HTTP : Le formulaire utilise la méthode POST pour soumettre les données
+de manière sécurisée dans le corps (payload) de la requête HTTP, et non dans l'URL (GET)
+où l'email serait journalisé en clair par les serveurs proxy et les logs Nginx/Apache.
+En l'absence d'attribut 'action', la soumission boucle intelligemment sur la route courante.
+#}
+<form method="post" style="margin-bottom: 20px;">
+    <div>
+        <label for="email">Email Address:</label>
+
+        {#
+        Couplage Vue-Contrôleur : L'attribut name="email" est le contrat strict entre le front et le back.
+        C'est cette clé exacte que notre ResetPasswordController va extraire via
+        l'objet Request ($request->request->get('email')).
+        L'attribut 'required' et le type 'email' assurent une première couche de validation native
+        côté client (navigateur) avant même d'engager les ressources de notre serveur.
+        #}
+        <input type="email" name="email" id="email" required autofocus>
+    </div>
+    <br>
+
+    {#
+    Le bouton de soumission. Une fois cliqué, le flux part vers le contrôleur qui appliquera
+    notre fameuse logique d'anti-énumération (on ne dit jamais si l'email existe vraiment)
+    avant de rediriger l'utilisateur.
+    #}
+    <button type="submit">Send password reset link</button>
+</form>
+
+{#
+Routing dynamique : Lien de repli classique pour une bonne ergonomie.
+On utilise la fonction Twig path() avec le nom de route 'app_login'.
+C'est la garantie absolue de ne pas créer de liens morts (Broken Links) si on décide
+un jour de modifier le chemin physique '/login' dans notre contrôleur.
+#}
+<a href="{{ path('app_login') }}">Back to login</a>
+
+</body>
+</html>
