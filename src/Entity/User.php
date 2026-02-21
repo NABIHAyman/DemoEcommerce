@@ -34,9 +34,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Order::class)]
     private Collection $orders;
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Address::class, orphanRemoval: true)]
+    private Collection $addresses;
+
     public function __construct()
     {
         $this->orders = new ArrayCollection();
+        $this->addresses = new ArrayCollection();
     }
 
     // --- MÉTHODES OBLIGATOIRES POUR LA SÉCURITÉ SYMFONY ---
@@ -75,9 +79,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->email;
     }
 
-    public function setEmail(?string $email): void
+    public function setEmail(?string $email): static
     {
         $this->email = $email;
+        return $this;
     }
 
     public function getPassword(): ?string
@@ -85,9 +90,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->password;
     }
 
-    public function setPassword(?string $password): void
+    public function setPassword(?string $password): static
     {
         $this->password = $password;
+        return $this;
     }
 
     public function getFirstname(): ?string
@@ -95,9 +101,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->firstname;
     }
 
-    public function setFirstname(?string $firstname): void
+    public function setFirstname(?string $firstname): static
     {
         $this->firstname = $firstname;
+        return $this;
     }
 
     public function getLastname(): ?string
@@ -105,9 +112,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->lastname;
     }
 
-    public function setLastname(?string $lastname): void
+    public function setLastname(?string $lastname): static
     {
         $this->lastname = $lastname;
+        return $this;
     }
 
     public function getOrders(): Collection
@@ -118,6 +126,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setOrders(Collection $orders): void
     {
         $this->orders = $orders;
+    }
+
+    /**
+     * @return Collection<int, Address>
+     */
+    public function getAddresses(): Collection
+    {
+        return $this->addresses;
+    }
+
+    public function addAddress(Address $address): static
+    {
+        if (!$this->addresses->contains($address)) {
+            $this->addresses->add($address);
+            $address->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAddress(Address $address): static
+    {
+        if ($this->addresses->removeElement($address)) {
+            // set the owning side to null (unless already changed)
+            if ($address->getUser() === $this) {
+                $address->setUser(null);
+            }
+        }
+
+        return $this;
     }
 
     public function eraseCredentials(): void

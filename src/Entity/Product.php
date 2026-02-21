@@ -46,9 +46,10 @@ class Product
         return $this->name;
     }
 
-    public function setName(?string $name): void
+    public function setName(?string $name): static
     {
         $this->name = $name;
+        return $this;
     }
 
     public function getDescription(): ?string
@@ -56,9 +57,10 @@ class Product
         return $this->description;
     }
 
-    public function setDescription(?string $description): void
+    public function setDescription(?string $description): static
     {
         $this->description = $description;
+        return $this;
     }
 
     public function getPrice(): ?int
@@ -66,9 +68,10 @@ class Product
         return $this->price;
     }
 
-    public function setPrice(?int $price): void
+    public function setPrice(?int $price): static
     {
         $this->price = $price;
+        return $this;
     }
 
     public function getImage(): ?string
@@ -86,9 +89,10 @@ class Product
         return $this->isTop;
     }
 
-    public function setIsTop(?bool $isTop): void
+    public function setIsTop(?bool $isTop): static
     {
         $this->isTop = $isTop;
+        return $this;
     }
 
     public function getCategory(): ?Category
@@ -96,8 +100,9 @@ class Product
         return $this->category;
     }
 
-    public function setCategory(?Category $category): void
+    public function setCategory(?Category $category): static
     {
         $this->category = $category;
+        return $this;
     }
 }

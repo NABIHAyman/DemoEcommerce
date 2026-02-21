@@ -5,6 +5,7 @@ namespace App\DataFixtures;
 use App\Entity\Category;
 use App\Entity\Product;
 use App\Entity\User;
+use App\Entity\Carrier; // Ne pas oublier l'import !
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -13,71 +14,79 @@ class AppFixtures extends Fixture
 {
     private UserPasswordHasherInterface $hasher;
 
-    // Pattern d'Injection de Dépendance (Dependency Injection - DI).
-    // Au lieu d'instancier manuellement le service de hachage (couplage fort),
-    // on demande au conteneur de services (Service Container) de Symfony de nous l'injecter
-    // automatiquement lors de l'instanciation de cette classe (Autowiring).
     public function __construct(UserPasswordHasherInterface $hasher)
     {
         $this->hasher = $hasher;
     }
 
-    // Méthode principale exécutée par la commande CLI `doctrine:fixtures:load`.
-    // Elle orchestre le peuplement (Data Seeding) de la base de données de développement.
     public function load(ObjectManager $manager): void
     {
-        // 1. Initialisation de l'utilisateur Administrateur (Super-user).
+        // --- 1. LES UTILISATEURS ---
         $admin = new User();
-        $admin->setEmail('admin@ecommerce.com');
-
-        // Attribution des droits via un tableau de rôles (Role-Based Access Control - RBAC).
-        $admin->setRoles(['ROLE_ADMIN']);
-        $admin->setFirstname('Ayman');
-        $admin->setLastname('Admin');
-
-        // Sécurité : Application de l'algorithme de hachage (défini dans security.yaml, ex: Argon2id)
-        // sur le mot de passe en clair avant de l'injecter dans l'entité.
-        $password = $this->hasher->hashPassword($admin, 'Admin123!');
-        $admin->setPassword($password);
-
-        // Le pattern "Unit of Work" de Doctrine entre en action.
-        // L'ObjectManager commence à "traquer" cet objet en mémoire. Aucune requête SQL n'est encore exécutée.
+        $admin->setEmail('admin@ecommerce.com')
+            ->setRoles(['ROLE_ADMIN'])
+            ->setFirstname('Ayman')
+            ->setLastname('Admin')
+            ->setPassword($this->hasher->hashPassword($admin, 'Admin123!'));
         $manager->persist($admin);
 
-        // 2. Création du référentiel (Lookup tables) : Les Catégories.
-        $catComputers = new Category();
-        $catComputers->setName('IT & Computers');
-        $manager->persist($catComputers);
+        $customer = new User();
+        $customer->setEmail('client@test.com')
+            ->setRoles(['ROLE_USER'])
+            ->setFirstname('Jean')
+            ->setLastname('Dupont')
+            ->setPassword($this->hasher->hashPassword($customer, 'Client123!'));
+        $manager->persist($customer);
 
-        $catAppliances = new Category();
-        $catAppliances->setName('Home Appliances');
-        $manager->persist($catAppliances);
+        // --- 2. LES TRANSPORTEURS (CARRIERS) ---
+        $carriersData = [
+            ['Standard Delivery', 'Livraison à domicile en 3 à 5 jours ouvrés.', 500],
+            ['Express 24h', 'Livraison rapide le lendemain avant 13h.', 1200],
+            ['Relais Colis', 'Livraison dans le point relais le plus proche.', 390],
+            ['Retrait Magasin', 'Récupérez votre commande gratuitement en 2h.', 0],
+        ];
 
-        // 3. Création du jeu d'essai métier principal : Les Produits.
-        $product1 = new Product();
-        $product1->setName('Gaming Laptop');
-        $product1->setDescription('A highly powerful laptop for gaming.');
+        foreach ($carriersData as $data) {
+            $carrier = new Carrier();
+            $carrier->setName($data[0])
+                ->setDescription($data[1])
+                ->setPrice($data[2]);
+            $manager->persist($carrier);
+        }
 
-        // Modélisation financière (Floating Point Math workaround).
-        // Stockage strict en centimes (Integer) pour prévenir la perte de précision flottante des CPU.
-        $product1->setPrice(150000); // Équivaut à 1500.00 € / $
-        $product1->setIsTop(true);
+        // --- 3. LES CATÉGORIES ---
+        $categories = [];
+        $catNames = ['IT & Computers', 'Home Appliances', 'Audio & Hi-Fi', 'Gadgets'];
 
-        // Mapping de la relation (Foreign Key) grâce à l'ORM Doctrine.
-        $product1->setCategory($catComputers);
-        $manager->persist($product1);
+        foreach ($catNames as $name) {
+            $category = new Category();
+            $category->setName($name);
+            $manager->persist($category);
+            $categories[] = $category; // On stocke pour lier aux produits
+        }
 
-        $product2 = new Product();
-        $product2->setName('Coffee Machine');
-        $product2->setDescription('For those tough mornings.');
-        $product2->setPrice(8999); // Équivaut à 89.99 € / $
-        $product2->setIsTop(false);
-        $product2->setCategory($catAppliances);
-        $manager->persist($product2);
+        // --- 4. LES PRODUITS (Gros jeu de données) ---
+        $productsData = [
+            ['Gaming Laptop', 'High performance for pro gamers.', 150000, true, 0],
+            ['Macbook Air', 'M3 Chip, 16GB RAM, Midnight color.', 129900, true, 0],
+            ['Coffee Machine', 'Perfect espresso every morning.', 8999, false, 1],
+            ['Air Fryer', 'Healthy cooking with 90% less oil.', 12000, true, 1],
+            ['Wireless Headphones', 'Active Noise Cancelling technology.', 25000, true, 2],
+            ['Bluetooth Speaker', 'Waterproof IP67 for pool parties.', 5500, false, 2],
+            ['Smart Watch', 'Track your health and fitness 24/7.', 19900, false, 3],
+            ['Power Bank 20k', 'Charge your phone 5 times.', 3500, false, 3],
+        ];
 
-        // 4. Commit de la transaction de base de données.
-        // Doctrine calcule le "diff" (changement d'état) de tous les objets persistés en mémoire,
-        // génère le code SQL optimal (INSERT INTO...), et l'envoie au serveur MySQL en un seul batch.
+        foreach ($productsData as $data) {
+            $product = new Product();
+            $product->setName($data[0])
+                ->setDescription($data[1])
+                ->setPrice($data[2])
+                ->setIsTop($data[3])
+                ->setCategory($categories[$data[4]]); // Lien dynamique
+            $manager->persist($product);
+        }
+
         $manager->flush();
     }
 }

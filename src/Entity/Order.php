@@ -27,6 +27,18 @@ class Order
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $carrierName = null;
+
+    #[ORM\Column]
+    private ?int $carrierPrice = null;
+
+    #[ORM\Column(type: 'text')]
+    private ?string $deliveryAddress = null;
+
+    #[ORM\Column(type: 'text')]
+    private ?string $billingAddress = null;
+
     #[ORM\OneToMany(mappedBy: 'orderRef', targetEntity: OrderItem::class, cascade: ['persist', 'remove'])]
     private Collection $items;
 
@@ -95,4 +107,13 @@ class Order
     {
         $this->items = $items;
     }
+
+    public function getCarrierName(): ?string { return $this->carrierName; }
+    public function setCarrierName(string $carrierName): static { $this->carrierName = $carrierName; return $this; }
+    public function getCarrierPrice(): ?int { return $this->carrierPrice; }
+    public function setCarrierPrice(int $carrierPrice): static { $this->carrierPrice = $carrierPrice; return $this; }
+    public function getDeliveryAddress(): ?string { return $this->deliveryAddress; }
+    public function setDeliveryAddress(string $deliveryAddress): static { $this->deliveryAddress = $deliveryAddress; return $this; }
+    public function getBillingAddress(): ?string { return $this->billingAddress; }
+    public function setBillingAddress(string $billingAddress): static { $this->billingAddress = $billingAddress; return $this; }
 }

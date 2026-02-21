@@ -1,0 +1,83 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Checkout | Minimalist Store{% endblock %}
+
+{% block body %}
+    <div class="mb-6">
+        <h1 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Checkout</h1>
+    </div>
+
+    <form action="{{ path('app_checkout_process') }}" method="POST" class="flex flex-col lg:flex-row gap-8">
+
+        <div class="flex-grow space-y-8">
+
+            <div class="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
+                <div class="flex justify-between items-center mb-4 border-b border-slate-50 dark:border-slate-800 pb-4">
+                    <h2 class="text-lg font-bold flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">location_on</span> 1. Shipping Address
+                    </h2>
+                    <a href="{{ path('app_checkout_address_add') }}" class="text-xs font-bold text-primary uppercase tracking-widest hover:underline">+ New Address</a>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {% for address in addresses %}
+                        <label class="relative cursor-pointer">
+                            <input type="radio" name="address_id" value="{{ address.id }}" class="peer sr-only" required {% if loop.first %}checked{% endif %}>
+                            <div class="p-4 rounded border-2 border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all peer-checked:border-primary peer-checked:bg-primary/5">
+                                <h3 class="font-bold text-slate-900 dark:text-white text-sm mb-1">{{ address.name }}</h3>
+                                <p class="text-xs text-slate-500 leading-relaxed">{{ address.formattedAddress|raw }}</p>
+                            </div>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
+                <h2 class="text-lg font-bold flex items-center gap-2 mb-4 border-b border-slate-50 dark:border-slate-800 pb-4">
+                    <span class="material-symbols-outlined text-primary">local_shipping</span> 2. Shipping Method
+                </h2>
+
+                <div class="space-y-3">
+                    {% for carrier in carriers %}
+                        <label class="relative flex items-center justify-between p-4 rounded border-2 border-slate-100 dark:border-slate-700 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 peer-checked:border-primary peer-checked:bg-primary/5">
+                            <input type="radio" name="carrier_id" value="{{ carrier.id }}" class="peer w-4 h-4 text-primary bg-slate-100 border-slate-300 focus:ring-primary focus:ring-2" required {% if loop.first %}checked{% endif %}>
+                            <div class="ml-4 flex-grow">
+                                <span class="block text-sm font-bold text-slate-900 dark:text-white">{{ carrier.name }}</span>
+                                <span class="block text-xs text-slate-500">{{ carrier.description }}</span>
+                            </div>
+                            <span class="font-bold text-slate-900 dark:text-white">{{ (carrier.price / 100)|number_format(2, '.', ',') }} €</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+
+        <div class="w-full lg:w-96">
+            <div class="bg-white dark:bg-slate-900 p-8 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.06)] border border-slate-100 dark:border-slate-800 sticky top-28">
+                <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-6 tracking-tight">Order Summary</h2>
+
+                <div class="space-y-4 mb-6">
+                    <div class="flex justify-between text-slate-500 font-medium text-sm">
+                        <span>Cart Subtotal</span>
+                        <span class="text-slate-900 dark:text-white">{{ (totalCart / 100)|number_format(2, '.', ',') }} €</span>
+                    </div>
+                    <div class="flex justify-between text-slate-500 font-medium text-sm border-b border-slate-100 dark:border-slate-800 pb-4">
+                        <span>Shipping</span>
+                        <span class="text-primary italic text-xs">Calculated at payment</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-slate-900 hover:bg-primary text-white py-4 rounded-lg font-bold text-sm uppercase tracking-widest shadow-lg transition-all flex items-center justify-center gap-3">
+                    Pay & Place Order
+                    <span class="material-symbols-outlined text-lg">credit_card</span>
+                </button>
+
+                <div class="mt-6 text-center text-xs text-slate-400">
+                    <span class="material-symbols-outlined text-base align-middle mr-1">lock</span> Secure 256-bit SSL encryption.
+                </div>
+            </div>
+        </div>
+
+    </form>
+{% endblock %}
