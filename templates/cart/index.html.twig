@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Your Cart</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .remove-btn { color: red; text-decoration: none; font-weight: bold; }
+        .btn { padding: 10px 15px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; }
+        .alert-info { background: #e2f3f5; padding: 15px; margin-top: 20px; border-left: 5px solid #00b8d4; }
+        .alert-warning { background: #fff3cd; padding: 15px; margin-top: 20px; border-left: 5px solid #ffc107; }
+    </style>
+</head>
+<body>
+
+<h1>Your Shopping Cart</h1>
+
+<div style="margin-bottom: 20px;">
+    <a href="{{ path('app_products') }}">← Continue shopping</a>
+</div>
+
+{% if cart|length > 0 %}
+    <table>
+        <thead>
+        <tr>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Total</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for item in cart %}
+            <tr>
+                <td><strong>{{ item.product.name }}</strong></td>
+                <td>{{ (item.product.price / 100)|number_format(2, '.', ',') }} €</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ ((item.product.price * item.quantity) / 100)|number_format(2, '.', ',') }} €</td>
+                <td>
+                    {# Le fameux bouton "Supprimer" demandé par le professeur #}
+                    <a href="{{ path('app_cart_remove', {'id': item.product.id}) }}" class="remove-btn">Remove</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        <tfoot>
+        <tr>
+            <td colspan="3" style="text-align: right;"><strong>Grand Total:</strong></td>
+            <td><strong>{{ (total / 100)|number_format(2, '.', ',') }} €</strong></td>
+            <td></td>
+        </tr>
+        </tfoot>
+    </table>
+
+{% else %}
+    <p>Your cart is currently empty.</p>
+{% endif %}
+
+{# --- CONSIGNE DU PROFESSEUR : GESTION DE L'ÉTAT DE CONNEXION --- #}
+{% if app.user %}
+    <div class="alert-info" style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <strong>✅ Panier enregistré !</strong> Vous pouvez procéder au paiement de votre commande.
+        </div>
+        {# Le bouton qui déclenche la création de la commande #}
+        <a href="{{ path('app_order_create') }}" style="background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+            Valider la commande
+        </a>
+    </div>
+{% else %}
+    <div class="alert-warning">
+        ⚠️ <a href="{{ path('app_login') }}">Veuillez vous connecter</a> pour enregistrer et valider votre panier.
+    </div>
+{% endif %}
+
+</body>
+</html>
