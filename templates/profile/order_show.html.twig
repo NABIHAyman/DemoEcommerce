@@ -96,24 +96,17 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white dark:bg-slate-800 p-6 rounded shadow-sm border border-slate-200 dark:border-slate-700">
-                        <h3 class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-4">Shipping Address</h3>
-                        <p class="font-bold text-slate-900 dark:text-slate-100 mb-1">{{ app.user.firstname }} {{ app.user.lastname }}</p>
-                        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
-                            123 Innovation Drive<br/>
-                            Suite 400<br/>
-                            Berlin, 10115<br/>
-                            Germany
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <h3 class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4">Shipping Address</h3>
+                        {# On utilise le filtre |raw car notre getFormattedAddress() contient des balises <br/> #}
+                        <p class="text-slate-600 text-sm leading-relaxed">
+                            {{ order.deliveryAddress|raw }}
                         </p>
                     </div>
-                    <div class="bg-white dark:bg-slate-800 p-6 rounded shadow-sm border border-slate-200 dark:border-slate-700">
-                        <h3 class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-4">Billing Address</h3>
-                        <p class="font-bold text-slate-900 dark:text-slate-100 mb-1">{{ app.user.firstname }} {{ app.user.lastname }}</p>
-                        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
-                            123 Innovation Drive<br/>
-                            Suite 400<br/>
-                            Berlin, 10115<br/>
-                            Germany
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <h3 class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4">Billing Address</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed">
+                            {{ order.billingAddress|raw }}
                         </p>
                     </div>
                 </div>

@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Entity\Order;
+use Symfony\Component\HttpFoundation\Request;
 
 class ProfileController extends AbstractController
 {
@@ -45,6 +46,36 @@ class ProfileController extends AbstractController
 
         return $this->render('profile/order_show.html.twig', [
             'order' => $order,
+        ]);
+    }
+
+    /**
+     * Route affichant l'historique complet avec pagination manuelle.
+     */
+    #[Route('/profile/orders', name: 'app_profile_orders_history')]
+    public function ordersHistory(Request $request, \App\Repository\OrderRepository $orderRepository): Response
+    {
+        $user = $this->getUser();
+        if (!$user) return $this->redirectToRoute('app_login');
+
+        // 1. Paramètres de pagination
+        // On récupère le paramètre ?page= dans l'URL. S'il n'existe pas, c'est 1 par défaut.
+        // La fonction max() garantit qu'un petit malin ne tape pas ?page=-5
+        $page = max(1, $request->query->getInt('page', 1));
+        $limit = 5; // On affiche 5 commandes par page
+
+        // 2. Exécution de nos requêtes personnalisées
+        $orders = $orderRepository->findPaginatedByUser($user, $page, $limit);
+        $totalOrders = $orderRepository->countByUser($user);
+
+        // 3. Calcul du nombre total de pages
+        // ceil() arrondit à l'entier supérieur (ex: 11 items / 5 = 2.2 -> 3 pages)
+        $totalPages = ceil($totalOrders / $limit);
+
+        return $this->render('profile/orders_history.html.twig', [
+            'orders' => $orders,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
         ]);
     }
 }
