@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{{ product.name }} - E-commerce</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .product-card { border: 1px solid #ddd; padding: 20px; max-width: 600px; border-radius: 8px; }
+        .category-badge { background: #eee; padding: 5px 10px; border-radius: 15px; font-size: 0.9em; color: #555; }
+        .price { font-size: 1.5em; color: #28a745; font-weight: bold; margin: 15px 0; }
+        .btn-add { background: green; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; display: inline-block; }
+        .btn-back { color: #007bff; text-decoration: none; display: inline-block; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+<a href="{{ path('app_products') }}" class="btn-back">← Back to Catalog</a>
+
+<div class="product-card">
+    <span class="category-badge">{{ product.category.name }}</span>
+
+    <h1>{{ product.name }}</h1>
+
+    <p>{{ product.description }}</p>
+
+    <div class="price">
+        {{ (product.price / 100)|number_format(2, '.', ',') }} €
+    </div>
+
+    {# Le bouton d'ajout au panier qui pointe vers notre CartController #}
+    <a href="{{ path('app_cart_add', {'id': product.id}) }}" class="btn-add">Add to Cart</a>
+</div>
+
+</body>
+</html>

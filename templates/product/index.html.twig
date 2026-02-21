@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Product Catalog</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .logout-btn { color: red; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div style="display: flex; justify-content: space-between; align-items: center;">
+
+    {#
+    Affichage dynamique sécurisé.
+    L'objet 'user' (qui implémente UserInterface) nous a été passé par le ProductController.
+    La sécurité est intégrée : Twig gère automatiquement l'échappement (escaping) des variables
+    comme 'user.firstname' pour neutraliser par défaut toute tentative de faille XSS (Cross-Site Scripting).
+    #}
+    <h1>Welcome, {{ app.user.firstname }}!</h1>
+
+    {#
+    Le lien de déconnexion pointe vers la route 'app_logout'.
+    Concept architectural : Ce n'est pas notre contrôleur qui va gérer la déconnexion,
+    c'est le pare-feu (Firewall) de sécurité de Symfony qui va intercepter cette requête,
+    détruire le cookie de session (PHPSESSID), purger le contexte de sécurité,
+    et nous rediriger proprement vers la page de login.
+    #}
+    <a href="{{ path('app_logout') }}" class="logout-btn">Sign out</a>
+</div>
+
+<h2>Our Catalog</h2>
+
+{# --- BARRE DE NAVIGATION DES CATÉGORIES --- #}
+<div style="margin-bottom: 20px; padding: 10px; background-color: #f8f9fa; border: 1px solid #ddd; border-radius: 5px;">
+    <strong>Filter by Category:</strong>
+
+    {# Lien pour réinitialiser le filtre (retourner au catalogue complet) #}
+    <a href="{{ path('app_products') }}"
+       style="margin-left: 10px; text-decoration: none; padding: 5px; {% if current_category is null %}font-weight: bold; color: black; border-bottom: 2px solid black;{% else %}color: #007bff;{% endif %}">
+        All Products
+    </a>
+
+    {# Boucle dynamique sur toutes les catégories de la base de données #}
+    {% for cat in categories %}
+        <a href="{{ path('app_products_by_category', {'id': cat.id}) }}"
+           style="margin-left: 10px; text-decoration: none; padding: 5px; {% if current_category and current_category.id == cat.id %}font-weight: bold; color: black; border-bottom: 2px solid black;{% else %}color: #007bff;{% endif %}">
+            {{ cat.name }}
+        </a>
+    {% endfor %}
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>Product Name</th>
+        <th>Category</th>
+        <th>Description</th>
+        <th>Price</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+
+    {#
+    Boucle itérative Twig sur le tableau (ou ArrayCollection) retourné par Doctrine.
+    Excellente pratique UX/UI : l'utilisation de la clause '{% else %}' intégrée
+    qui gère nativement le cas (edge case) où le catalogue est vide,
+    ce qui évite d'afficher un tableau vide et cassé à l'utilisateur.
+    #}
+    {% for product in products %}
+        <tr>
+            <td>
+                <strong>
+                    <a href="{{ path('app_product_show', {'id': product.id}) }}" style="color: black; text-decoration: underline;">
+                        {{ product.name }}
+                    </a>
+                </strong>
+            </td>
+
+            {#
+            Magie de l'ORM Doctrine : Le "Lazy Loading" (Chargement différé).
+            On accède à la propriété 'name' de l'entité Category via la relation ManyToOne de Product.
+            Même si la catégorie n'était pas directement jointe dans la requête SQL initiale,
+            Doctrine va automatiquement exécuter une requête transparente pour récupérer la donnée.
+            #}
+            <td>{{ product.category.name }}</td>
+
+            <td>{{ product.description }}</td>
+
+            {#
+            Ingénierie E-commerce standard : Gestion des flottants (Floating Point Math).
+            Puisque la base de données stocke le prix en centimes (entier / Integer) pour éviter
+            les fameuses erreurs d'arrondis monétaires de l'architecture CPU, on doit le diviser par 100
+            uniquement au moment de la présentation (la Vue).
+            Le filtre '|number_format' applique ensuite le formatage d'affichage.
+            #}
+            <td>{{ (product.price / 100)|number_format(2, '.', ',') }} €</td>
+
+            <td>
+                <a href="{{ path('app_cart_add', {'id': product.id}) }}" style="background: green; color: white; padding: 5px 10px; text-decoration: none;">Add to Cart</a>
+            </td>
+        </tr>
+    {% else %}
+        <tr>
+            <td colspan="4">No products available at the moment.</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>
