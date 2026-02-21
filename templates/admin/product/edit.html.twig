@@ -1,0 +1,9 @@
+{% extends 'admin/base.html.twig' %}
+{% block page_title %}Edit Product{% endblock %}
+
+{% block body %}
+    <div class="max-w-2xl bg-white p-8 rounded-xl shadow-sm border border-slate-200">
+        <h1 class="text-2xl font-bold mb-6">Edit: {{ product.name }}</h1>
+        {{ include('admin/product/_form.html.twig', {'button_label': 'Update Product'}) }}
+    </div>
+{% endblock %}

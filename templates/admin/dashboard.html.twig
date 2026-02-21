@@ -1,0 +1,148 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}Dashboard Overview{% endblock %}
+
+{% block body %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white dark:bg-slate-900 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col gap-2">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Total Revenue</span>
+                <span class="material-symbols-outlined text-primary text-sm">payments</span>
+            </div>
+            <div class="text-3xl font-bold tracking-tight">{{ (revenue / 100)|number_format(2, '.', ',') }} €</div>
+            <div class="flex items-center gap-1 text-[10px] font-bold text-primary">
+                <span class="material-symbols-outlined text-xs">trending_up</span>
+                <span>Global lifetime</span>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-slate-900 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col gap-2">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Orders</span>
+                <span class="material-symbols-outlined text-slate-400 text-sm">shopping_cart</span>
+            </div>
+            <div class="text-3xl font-bold tracking-tight">{{ total_orders }}</div>
+            <div class="flex items-center gap-1 text-[10px] font-bold text-primary">
+                <span class="material-symbols-outlined text-xs">check_circle</span>
+                <span>Processed</span>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-slate-900 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col gap-2">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Products</span>
+                <span class="material-symbols-outlined text-slate-400 text-sm">inventory</span>
+            </div>
+            <div class="text-3xl font-bold tracking-tight">{{ total_products }}</div>
+            <div class="flex items-center gap-1 text-[10px] font-bold text-slate-400">
+                <span class="material-symbols-outlined text-xs">remove</span>
+                <span>In catalog</span>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-slate-900 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col gap-2">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Users</span>
+                <span class="material-symbols-outlined text-slate-400 text-sm">person</span>
+            </div>
+            <div class="text-3xl font-bold tracking-tight">{{ total_users }}</div>
+            <div class="flex items-center gap-1 text-[10px] font-bold text-primary">
+                <span class="material-symbols-outlined text-xs">group_add</span>
+                <span>Registered</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden mb-8">
+        <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+            <h3 class="text-lg font-bold">Recent Orders</h3>
+            <button class="text-sm font-bold text-primary hover:underline">View All</button>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                <tr class="bg-slate-50 dark:bg-slate-800/50">
+                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Order ID</th>
+                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Customer</th>
+                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
+                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Total</th>
+                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                {% for order in recent_orders %}
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                        <td class="px-6 py-4 text-sm font-medium">#ORD-{{ order.id }}</td>
+                        <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">{{ order.user.firstname }} {{ order.user.lastname }}</td>
+                        <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">{{ order.createdAt|date('M d, Y') }}</td>
+                        <td class="px-6 py-4 text-sm font-bold">{{ (order.total / 100)|number_format(2, '.', ',') }} €</td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded text-xs font-bold {% if order.status == 'VALIDATED' %}bg-primary/10 text-primary{% else %}bg-slate-100 text-slate-600{% endif %}">
+                                {{ order.status }}
+                            </span>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-8 text-center text-sm text-slate-500">No orders yet.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2 bg-white dark:bg-slate-900 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-bold">Sales Volume</h3>
+                <div class="flex gap-2">
+                    <span class="size-2 rounded-full bg-primary mt-1.5"></span>
+                    <span class="text-xs font-medium text-slate-500">Net Profit</span>
+                </div>
+            </div>
+            <div class="h-48 flex items-end gap-2 px-2">
+                <div class="flex-1 bg-primary/10 hover:bg-primary/20 transition-colors h-24 rounded-t-sm"></div>
+                <div class="flex-1 bg-primary/10 hover:bg-primary/20 transition-colors h-32 rounded-t-sm"></div>
+                <div class="flex-1 bg-primary/10 hover:bg-primary/20 transition-colors h-20 rounded-t-sm"></div>
+                <div class="flex-1 bg-primary h-40 rounded-t-sm shadow-md"></div>
+                <div class="flex-1 bg-primary/10 hover:bg-primary/20 transition-colors h-28 rounded-t-sm"></div>
+                <div class="flex-1 bg-primary/10 hover:bg-primary/20 transition-colors h-36 rounded-t-sm"></div>
+                <div class="flex-1 bg-primary/10 hover:bg-primary/20 transition-colors h-30 rounded-t-sm"></div>
+            </div>
+            <div class="flex justify-between mt-4 px-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col">
+            <h3 class="text-lg font-bold mb-6">Action Items</h3>
+            <div class="flex flex-col gap-4">
+                <div class="flex items-center gap-4 p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors border border-transparent hover:border-slate-100 dark:hover:border-slate-700">
+                    <div class="size-10 bg-amber-100 rounded flex items-center justify-center text-amber-600">
+                        <span class="material-symbols-outlined text-lg">warning</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-sm font-bold">Low Stock Alert</span>
+                        <span class="text-xs text-slate-500">4 items need restock</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors border border-transparent hover:border-slate-100 dark:hover:border-slate-700">
+                    <div class="size-10 bg-blue-100 rounded flex items-center justify-center text-blue-600">
+                        <span class="material-symbols-outlined text-lg">support_agent</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-sm font-bold">New Support Ticket</span>
+                        <span class="text-xs text-slate-500">From Emma Wilson</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors border border-transparent hover:border-slate-100 dark:hover:border-slate-700">
+                    <div class="size-10 bg-primary/10 rounded flex items-center justify-center text-primary">
+                        <span class="material-symbols-outlined text-lg">verified</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-sm font-bold">System Update</span>
+                        <span class="text-xs text-slate-500">V2.4 Successfully deployed</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{# La fonction form_start() ouvre la balise <form> et génère automatiquement le token CSRF ! #}
+{{ form_start(form) }}
+<div class="mb-6">
+    {{ form_row(form.name) }}
+</div>
+
+<div class="flex items-center gap-4">
+    <button class="bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 px-6 rounded transition-colors">
+        {{ button_label|default('Save') }}
+    </button>
+    <a href="{{ path('app_admin_category_index') }}" class="text-slate-500 font-bold hover:underline text-sm">Cancel</a>
+</div>
+{{ form_end(form) }}

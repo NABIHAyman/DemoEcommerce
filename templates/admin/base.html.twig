@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>{% block title %}Admin Panel{% endblock %}</title>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet"/>
+
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#29a847",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#131f16",
+                    },
+                    fontFamily: { "display": ["Work Sans", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <style>
+        body { font-family: "Work Sans", sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .sidebar-item-active { background-color: rgba(41, 168, 71, 0.1); color: #29a847; border-right: 3px solid #29a847; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+<div class="flex h-screen overflow-hidden">
+
+    <aside class="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0">
+        <div class="p-6 flex items-center gap-3">
+            <div class="size-8 bg-primary rounded flex items-center justify-center text-white">
+                <span class="material-symbols-outlined">shield_person</span>
+            </div>
+            <span class="text-xl font-bold tracking-tight uppercase">Admin Panel</span>
+        </div>
+
+        <nav class="mt-4 flex-1">
+            <div class="px-3 mb-2">
+                <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-3">Main Menu</p>
+            </div>
+            <a class="{% if app.request.attributes.get('_route') == 'app_admin_dashboard' %}sidebar-item-active{% endif %} flex items-center gap-3 px-6 py-3 text-sm font-medium transition-colors hover:bg-slate-50" href="{{ path('app_admin_dashboard') }}">
+                <span class="material-symbols-outlined">dashboard</span> Dashboard
+            </a>
+            <a class="{% if 'app_admin_category' in app.request.attributes.get('_route') %}sidebar-item-active{% endif %} flex items-center gap-3 px-6 py-3 text-sm font-medium transition-colors hover:bg-slate-50" href="{{ path('app_admin_category_index') }}">
+                <span class="material-symbols-outlined">category</span> Categories
+            </a>
+            <a class="{% if 'app_admin_product' in app.request.attributes.get('_route') %}sidebar-item-active{% endif %} flex items-center gap-3 px-6 py-3 text-sm font-medium transition-colors hover:bg-slate-50" href="{{ path('app_admin_product_index') }}">
+                <span class="material-symbols-outlined">inventory_2</span> Products
+            </a>
+        </nav>
+
+        <div class="p-6 border-t border-slate-200">
+            <a href="{{ path('app_products') }}" class="flex items-center justify-center gap-2 w-full bg-slate-900 hover:bg-primary text-white py-2.5 rounded font-bold text-xs tracking-wider transition-colors uppercase">
+                <span class="material-symbols-outlined text-sm">storefront</span> Back to Store
+            </a>
+        </div>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark">
+        <header class="bg-white h-20 border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-10">
+            <div class="flex flex-col">
+                <h2 class="text-xl font-bold">{% block page_title %}Dashboard{% endblock %}</h2>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="flex flex-col text-right">
+                    <span class="text-sm font-bold text-slate-900">{{ app.user.firstname }} {{ app.user.lastname }}</span>
+                    <span class="text-xs text-slate-500">{{ app.user.email }}</span>
+                </div>
+                <div class="size-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold overflow-hidden">
+                    <span class="material-symbols-outlined">account_circle</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="p-8">
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="mb-4 p-4 rounded-lg text-sm font-bold {% if label == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            {% block body %}{% endblock %}
+        </div>
+    </main>
+</div>
+</body>
+</html>
