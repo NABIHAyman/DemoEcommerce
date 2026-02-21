@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Order #{{ order.id }} Details</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .nav-link { text-decoration: none; color: #007bff; font-weight: bold; margin-bottom: 20px; display: inline-block; }
+        .summary-box { background: #f8f9fa; padding: 15px; border-radius: 5px; border: 1px solid #ddd; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+<a href="{{ path('app_user_profile') }}" class="nav-link">← Back to Dashboard</a>
+
+<h1>Order #{{ order.id }}</h1>
+
+<div class="summary-box">
+    <p><strong>Date:</strong> {{ order.createdAt|date('d/m/Y H:i') }}</p>
+    <p><strong>Status:</strong> <span style="background: #17a2b8; color: white; padding: 3px 8px; border-radius: 10px; font-size: 0.9em;">{{ order.status }}</span></p>
+</div>
+
+<h2>Items Purchased</h2>
+
+<table>
+    <thead>
+    <tr>
+        <th>Product Name</th>
+        <th>Unit Price</th>
+        <th>Quantity</th>
+        <th>Subtotal</th>
+    </tr>
+    </thead>
+    <tbody>
+    {# On boucle sur les lignes de commande (OrderItems) #}
+    {% for item in order.items %}
+        <tr>
+            {# Remarque technique : On lit les données figées dans OrderItem, pas dans Product ! #}
+            <td>{{ item.productName }}</td>
+            <td>{{ (item.productPrice / 100)|number_format(2, '.', ',') }} €</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ ((item.productPrice * item.quantity) / 100)|number_format(2, '.', ',') }} €</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    <tfoot>
+    <tr>
+        <td colspan="3" style="text-align: right;"><strong>Total:</strong></td>
+        <td><strong>{{ (order.total / 100)|number_format(2, '.', ',') }} €</strong></td>
+    </tr>
+    </tfoot>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>My Profile</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .profile-card { background: #f8f9fa; padding: 20px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 30px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #343a40; color: white; }
+        .status-badge { background: #17a2b8; color: white; padding: 5px 10px; border-radius: 15px; font-size: 0.9em; font-weight: bold; }
+        .nav-link { text-decoration: none; color: #007bff; font-weight: bold; margin-bottom: 20px; display: inline-block; }
+    </style>
+</head>
+<body>
+
+<a href="{{ path('app_products') }}" class="nav-link">← Back to Catalog</a>
+
+{# --- AFFICHAGE DES MESSAGES FLASH (UX) --- #}
+{% for message in app.flashes('success') %}
+    <div style="background-color: #d4edda; color: #155724; padding: 15px; border: 1px solid #c3e6cb; border-radius: 5px; margin-bottom: 20px;">
+        ✅ {{ message }}
+    </div>
+{% endfor %}
+
+<h1>My Dashboard</h1>
+
+{# --- CONSIGNE N°1 : INFORMATIONS PERSONNELLES --- #}
+<div class="profile-card">
+    <h2>Personal Information</h2>
+    <p><strong>First Name:</strong> {{ user.firstname }}</p>
+    <p><strong>Last Name:</strong> {{ user.lastname }}</p>
+    <p><strong>Email Address:</strong> {{ user.email }}</p>
+    <p><strong>Account Role:</strong> {{ user.roles|join(', ') }}</p>
+</div>
+
+{# --- CONSIGNE N°2 : LISTE DES COMMANDES PASSÉES ET STATUT --- #}
+<h2>My Order History</h2>
+
+{% if user.orders|length > 0 %}
+    <table>
+        <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Date</th>
+            <th>Total Amount</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+        <tbody>
+        {# On boucle sur la relation OneToMany. Doctrine gère la requête SQL silencieusement. #}
+        {% for order in user.orders %}
+            <tr>
+                <td>
+                    <a href="{{ path('app_profile_order_show', {'id': order.id}) }}" style="color: #007bff; font-weight: bold; text-decoration: underline;">
+                        #{{ order.id }}
+                    </a>
+                </td>
+
+                {# Formatage de l'objet DateTimeImmutable #}
+                <td>{{ order.createdAt|date('d/m/Y H:i') }}</td>
+
+                {# Conversion des centimes en euros #}
+                <td><strong>{{ (order.total / 100)|number_format(2, '.', ',') }} €</strong></td>
+
+                <td><span class="status-badge">{{ order.status }}</span></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>You haven't placed any orders yet.</p>
+{% endif %}
+
+</body>
+</html>

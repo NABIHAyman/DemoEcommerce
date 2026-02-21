@@ -23,6 +23,12 @@
     #}
     <h1>Welcome, {{ app.user.firstname }}!</h1>
 
+    <div>
+        {# Le nouveau lien vers le profil #}
+        <a href="{{ path('app_user_profile') }}" style="margin-right: 15px; font-weight: bold; text-decoration: none;">My Profile</a>
+        <a href="{{ path('app_logout') }}" class="logout-btn">Sign out</a>
+    </div>
+
     {#
     Le lien de déconnexion pointe vers la route 'app_logout'.
     Concept architectural : Ce n'est pas notre contrôleur qui va gérer la déconnexion,
