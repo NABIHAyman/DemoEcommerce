@@ -1,77 +1,88 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>My Profile</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; }
-        .profile-card { background: #f8f9fa; padding: 20px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 30px; }
-        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        th { background-color: #343a40; color: white; }
-        .status-badge { background: #17a2b8; color: white; padding: 5px 10px; border-radius: 15px; font-size: 0.9em; font-weight: bold; }
-        .nav-link { text-decoration: none; color: #007bff; font-weight: bold; margin-bottom: 20px; display: inline-block; }
-    </style>
-</head>
-<body>
+{% extends 'base.html.twig' %}
 
-<a href="{{ path('app_products') }}" class="nav-link">← Back to Catalog</a>
+{% block title %}My Profile | Minimalist Store{% endblock %}
 
-{# --- AFFICHAGE DES MESSAGES FLASH (UX) --- #}
-{% for message in app.flashes('success') %}
-    <div style="background-color: #d4edda; color: #155724; padding: 15px; border: 1px solid #c3e6cb; border-radius: 5px; margin-bottom: 20px;">
-        ✅ {{ message }}
+{% block body %}
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 py-4">
+        <aside class="lg:col-span-1 space-y-2">
+            <a class="flex items-center gap-3 px-4 py-2 bg-primary/10 text-primary rounded-lg font-bold transition-colors" href="{{ path('app_user_profile') }}">
+                <span class="material-symbols-outlined">dashboard</span> Profile
+            </a>
+            <a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors font-medium" href="#">
+                <span class="material-symbols-outlined">package_2</span> My Orders
+            </a>
+            <a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors font-medium" href="{{ path('app_logout') }}">
+                <span class="material-symbols-outlined text-red-500">logout</span> Logout
+            </a>
+        </aside>
+
+        <div class="lg:col-span-3 space-y-6">
+            <div class="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row items-center gap-6">
+                <div class="relative">
+                    <div class="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center border-4 border-primary/10">
+                        <span class="material-symbols-outlined text-4xl text-slate-400">person</span>
+                    </div>
+                    <div class="absolute bottom-0 right-0 bg-primary text-white p-1 rounded-full border-2 border-white dark:border-slate-900">
+                        <span class="material-symbols-outlined text-[10px] block font-bold">verified</span>
+                    </div>
+                </div>
+                <div class="flex-grow text-center md:text-left">
+                    <h2 class="text-2xl font-black text-slate-900 dark:text-white leading-none mb-1">{{ app.user.firstname }} {{ app.user.lastname }}</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm mb-4">{{ app.user.email }}</p>
+                    <div class="flex flex-wrap justify-center md:justify-start gap-6">
+                        <div>
+                            <span class="block text-lg font-bold text-slate-900 dark:text-white">{{ user.orders|length }}</span>
+                            <span class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Orders</span>
+                        </div>
+                        <div class="w-px h-8 bg-slate-100 dark:bg-slate-800"></div>
+                        <div>
+                            <span class="block text-lg font-bold text-slate-900 dark:text-white">Active</span>
+                            <span class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Status</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="bg-slate-900 hover:bg-primary text-white px-5 py-2 rounded-lg font-bold text-xs uppercase tracking-widest transition-all">
+                    Edit Profile
+                </button>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
+                <div class="p-5 border-b border-slate-50 dark:border-slate-800 flex justify-between items-center">
+                    <h3 class="font-bold text-slate-900 dark:text-white">Recent Orders</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 dark:bg-slate-800/50 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
+                        <tr>
+                            <th class="px-6 py-4">Order ID</th>
+                            <th class="px-6 py-4">Date</th>
+                            <th class="px-6 py-4">Total</th>
+                            <th class="px-6 py-4">Status</th>
+                            <th class="px-6 py-4 text-right">Action</th>
+                        </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-50 dark:divide-slate-800">
+                        {% for order in user.orders %}
+                            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                                <td class="px-6 py-4 text-sm font-bold text-slate-900 dark:text-white">#ORD-{{ order.id }}</td>
+                                <td class="px-6 py-4 text-sm text-slate-500">{{ order.createdAt|date('M d, Y') }}</td>
+                                <td class="px-6 py-4 text-sm font-bold text-slate-900 dark:text-white">{{ (order.total / 100)|number_format(2) }} €</td>
+                                <td class="px-6 py-4">
+                                    <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase bg-primary/10 text-primary">Validated</span>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <a href="{{ path('app_profile_order_show', {id: order.id}) }}" class="text-primary hover:underline font-bold text-xs uppercase tracking-widest">Details</a>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="px-6 py-10 text-center text-slate-400 text-sm italic">No orders found yet.</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
-{% endfor %}
-
-<h1>My Dashboard</h1>
-
-{# --- CONSIGNE N°1 : INFORMATIONS PERSONNELLES --- #}
-<div class="profile-card">
-    <h2>Personal Information</h2>
-    <p><strong>First Name:</strong> {{ user.firstname }}</p>
-    <p><strong>Last Name:</strong> {{ user.lastname }}</p>
-    <p><strong>Email Address:</strong> {{ user.email }}</p>
-    <p><strong>Account Role:</strong> {{ user.roles|join(', ') }}</p>
-</div>
-
-{# --- CONSIGNE N°2 : LISTE DES COMMANDES PASSÉES ET STATUT --- #}
-<h2>My Order History</h2>
-
-{% if user.orders|length > 0 %}
-    <table>
-        <thead>
-        <tr>
-            <th>Order ID</th>
-            <th>Date</th>
-            <th>Total Amount</th>
-            <th>Status</th>
-        </tr>
-        </thead>
-        <tbody>
-        {# On boucle sur la relation OneToMany. Doctrine gère la requête SQL silencieusement. #}
-        {% for order in user.orders %}
-            <tr>
-                <td>
-                    <a href="{{ path('app_profile_order_show', {'id': order.id}) }}" style="color: #007bff; font-weight: bold; text-decoration: underline;">
-                        #{{ order.id }}
-                    </a>
-                </td>
-
-                {# Formatage de l'objet DateTimeImmutable #}
-                <td>{{ order.createdAt|date('d/m/Y H:i') }}</td>
-
-                {# Conversion des centimes en euros #}
-                <td><strong>{{ (order.total / 100)|number_format(2, '.', ',') }} €</strong></td>
-
-                <td><span class="status-badge">{{ order.status }}</span></td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-{% else %}
-    <p>You haven't placed any orders yet.</p>
-{% endif %}
-
-</body>
-</html>
+{% endblock %}

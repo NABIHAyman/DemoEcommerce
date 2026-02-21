@@ -1,35 +1,85 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>{{ product.name }} - E-commerce</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; }
-        .product-card { border: 1px solid #ddd; padding: 20px; max-width: 600px; border-radius: 8px; }
-        .category-badge { background: #eee; padding: 5px 10px; border-radius: 15px; font-size: 0.9em; color: #555; }
-        .price { font-size: 1.5em; color: #28a745; font-weight: bold; margin: 15px 0; }
-        .btn-add { background: green; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; display: inline-block; }
-        .btn-back { color: #007bff; text-decoration: none; display: inline-block; margin-bottom: 20px; }
-    </style>
-</head>
-<body>
+{% extends 'base.html.twig' %}
 
-<a href="{{ path('app_products') }}" class="btn-back">← Back to Catalog</a>
+{% block title %}{{ product.name }} | Minimalist Store{% endblock %}
 
-<div class="product-card">
-    <span class="category-badge">{{ product.category.name }}</span>
+{% block body %}
+    <nav class="flex items-center gap-2 text-sm text-slate-500 mb-8 mt-4">
+        <a class="hover:text-primary transition-colors font-medium" href="{{ path('app_products') }}">Catalog</a>
+        <span class="material-symbols-outlined text-xs">chevron_right</span>
+        <a class="hover:text-primary transition-colors font-medium" href="{{ path('app_products_by_category', {'id': product.category.id}) }}">{{ product.category.name }}</a>
+        <span class="material-symbols-outlined text-xs">chevron_right</span>
+        <span class="text-slate-900 dark:text-slate-100 font-bold">{{ product.name }}</span>
+    </nav>
 
-    <h1>{{ product.name }}</h1>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
 
-    <p>{{ product.description }}</p>
+        <div class="lg:col-span-7 space-y-4">
+            <div class="aspect-[4/5] bg-slate-200 dark:bg-slate-800 rounded-xl overflow-hidden group relative shadow-sm">
+                <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                     src="https://picsum.photos/seed/{{ product.id }}/800/1000"
+                     alt="{{ product.name }}">
 
-    <div class="price">
-        {{ (product.price / 100)|number_format(2, '.', ',') }} €
+                {% if product.isTop %}
+                    <div class="absolute top-4 left-4 bg-primary text-white text-xs font-bold px-3 py-1.5 uppercase tracking-widest rounded-sm shadow-md">
+                        Top Rated
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="lg:col-span-5 lg:sticky lg:top-32 space-y-8">
+            <div class="space-y-4">
+                <div class="inline-flex items-center gap-2 px-2.5 py-1 bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest rounded">
+                    <span class="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></span>
+                    In Stock
+                </div>
+
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 leading-tight">
+                    {{ product.name }}
+                </h1>
+
+                <div class="flex items-center gap-4">
+                    <span class="text-3xl font-bold text-slate-900 dark:text-slate-100">{{ (product.price / 100)|number_format(2, '.', ',') }} €</span>
+                </div>
+
+                <p class="text-base text-slate-600 dark:text-slate-400 leading-relaxed pt-2">
+                    {{ product.description }}
+                </p>
+            </div>
+
+            <div class="h-px bg-slate-200 dark:bg-slate-800"></div>
+
+            <div class="space-y-6">
+                <div class="space-y-4">
+                    <div class="flex items-center gap-4">
+                        {#
+                        Le bouton d'ajout pointe vers le CartController.
+                        En ingénierie UX, on utilise un design massif et coloré pour l'action principale.
+                        #}
+                        <a href="{{ path('app_cart_add', {'id': product.id}) }}" class="flex-1 h-14 bg-slate-900 hover:bg-primary dark:bg-primary dark:hover:bg-primary/90 text-white font-bold rounded-lg transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20 uppercase tracking-widest text-sm">
+                            <span class="material-symbols-outlined">shopping_cart</span>
+                            Add to Cart
+                        </a>
+                    </div>
+
+                    <p class="text-xs text-slate-500 text-center flex justify-center items-center gap-2 mt-4">
+                        <span class="material-symbols-outlined text-sm text-primary">verified_user</span>
+                        Secure payment & Free shipping over 100€
+                    </p>
+                </div>
+            </div>
+
+            <div class="space-y-0.5 border-t border-slate-200 dark:border-slate-800 pt-4">
+                <div class="w-full flex items-center justify-between py-4 border-b border-slate-100 dark:border-slate-800">
+                    <span class="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-sm">Category</span>
+                    <span class="text-slate-500 font-medium">{{ product.category.name }}</span>
+                </div>
+                <div class="w-full flex items-center justify-between py-4 border-b border-slate-100 dark:border-slate-800">
+                    <span class="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-sm">Shipping & Returns</span>
+                    <span class="text-slate-500 text-sm">30 days return</span>
+                </div>
+            </div>
+
+        </div>
     </div>
-
-    {# Le bouton d'ajout au panier qui pointe vers notre CartController #}
-    <a href="{{ path('app_cart_add', {'id': product.id}) }}" class="btn-add">Add to Cart</a>
-</div>
-
-</body>
-</html>
+{% endblock %}

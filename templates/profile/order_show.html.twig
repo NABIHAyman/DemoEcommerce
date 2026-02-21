@@ -1,58 +1,158 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Order #{{ order.id }} Details</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; }
-        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .nav-link { text-decoration: none; color: #007bff; font-weight: bold; margin-bottom: 20px; display: inline-block; }
-        .summary-box { background: #f8f9fa; padding: 15px; border-radius: 5px; border: 1px solid #ddd; margin-bottom: 20px; }
-    </style>
-</head>
-<body>
+{% extends 'base.html.twig' %}
 
-<a href="{{ path('app_user_profile') }}" class="nav-link">← Back to Dashboard</a>
+{% block title %}Order #{{ order.id }} | Minimalist Store{% endblock %}
 
-<h1>Order #{{ order.id }}</h1>
+{% block body %}
+    <div class="w-full py-2">
+        <nav class="flex items-center justify-between mb-8">
+            <a class="flex items-center gap-2 text-primary hover:opacity-80 transition-opacity font-bold text-sm uppercase tracking-widest" href="{{ path('app_user_profile') }}">
+                <span class="material-symbols-outlined text-base">arrow_back</span>
+                Back to Dashboard
+            </a>
+            <div class="flex gap-3">
+                <button onclick="window.print()" class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-[10px] font-bold uppercase tracking-widest hover:bg-slate-50 transition-colors shadow-sm">
+                    <span class="material-symbols-outlined text-lg">print</span>
+                    Print Invoice
+                </button>
+                <button class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded text-[10px] font-bold uppercase tracking-widest hover:opacity-90 transition-opacity shadow-sm">
+                    <span class="material-symbols-outlined text-lg">local_shipping</span>
+                    Track Shipment
+                </button>
+            </div>
+        </nav>
 
-<div class="summary-box">
-    <p><strong>Date:</strong> {{ order.createdAt|date('d/m/Y H:i') }}</p>
-    <p><strong>Status:</strong> <span style="background: #17a2b8; color: white; padding: 3px 8px; border-radius: 10px; font-size: 0.9em;">{{ order.status }}</span></p>
-</div>
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 border-b border-slate-200 dark:border-slate-700 pb-8">
+            <div class="space-y-2">
+                <div class="flex items-center gap-3">
+                    <h1 class="text-4xl font-black tracking-tight text-slate-900 dark:text-slate-50">Order #{{ order.id }}</h1>
+                    <span class="inline-flex items-center px-3 py-1 rounded bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider">
+                    {{ order.status }}
+                </span>
+                </div>
+                <p class="text-slate-500 dark:text-slate-400 font-medium">Placed on {{ order.createdAt|date('d/m/Y') }} at {{ order.createdAt|date('H:i') }}</p>
+            </div>
+            <div class="flex gap-8 text-sm">
+                <div>
+                    <p class="text-slate-400 dark:text-slate-500 uppercase text-[10px] font-bold tracking-widest mb-1">Payment Method</p>
+                    <p class="font-semibold text-slate-900 dark:text-white">Credit Card (**** 4242)</p>
+                </div>
+                <div>
+                    <p class="text-slate-400 dark:text-slate-500 uppercase text-[10px] font-bold tracking-widest mb-1">Shipping Method</p>
+                    <p class="font-semibold text-slate-900 dark:text-white">Express Delivery</p>
+                </div>
+            </div>
+        </div>
 
-<h2>Items Purchased</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-<table>
-    <thead>
-    <tr>
-        <th>Product Name</th>
-        <th>Unit Price</th>
-        <th>Quantity</th>
-        <th>Subtotal</th>
-    </tr>
-    </thead>
-    <tbody>
-    {# On boucle sur les lignes de commande (OrderItems) #}
-    {% for item in order.items %}
-        <tr>
-            {# Remarque technique : On lit les données figées dans OrderItem, pas dans Product ! #}
-            <td>{{ item.productName }}</td>
-            <td>{{ (item.productPrice / 100)|number_format(2, '.', ',') }} €</td>
-            <td>{{ item.quantity }}</td>
-            <td>{{ ((item.productPrice * item.quantity) / 100)|number_format(2, '.', ',') }} €</td>
-        </tr>
-    {% endfor %}
-    </tbody>
-    <tfoot>
-    <tr>
-        <td colspan="3" style="text-align: right;"><strong>Total:</strong></td>
-        <td><strong>{{ (order.total / 100)|number_format(2, '.', ',') }} €</strong></td>
-    </tr>
-    </tfoot>
-</table>
+            <div class="lg:col-span-2 space-y-6">
 
-</body>
-</html>
+                <div class="bg-white dark:bg-slate-800 rounded shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+                    <div class="p-6 border-b border-slate-100 dark:border-slate-700">
+                        <h2 class="text-lg font-bold flex items-center gap-2 text-slate-900 dark:text-white">
+                            <span class="material-symbols-outlined text-primary">shopping_bag</span>
+                            Items Purchased
+                        </h2>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-widest">
+                            <tr>
+                                <th class="px-6 py-4">Product</th>
+                                <th class="px-6 py-4">Unit Price</th>
+                                <th class="px-6 py-4 text-center">Qty</th>
+                                <th class="px-6 py-4 text-right">Subtotal</th>
+                            </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                            {% for item in order.items %}
+                                <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-4">
+                                            <div class="h-16 w-16 bg-slate-100 dark:bg-slate-700 rounded flex items-center justify-center overflow-hidden shrink-0 border border-slate-100 dark:border-slate-600">
+                                                {# L'image est générée dynamiquement avec le nom du produit #}
+                                                <img src="https://picsum.photos/seed/{{ item.productName|url_encode }}/100/100" class="h-full w-full object-cover">
+                                            </div>
+                                            <div>
+                                                <p class="font-bold text-slate-900 dark:text-slate-100 text-sm">{{ item.productName }}</p>
+                                                <p class="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold tracking-widest mt-1">Reference Product</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 font-medium text-sm text-slate-600 dark:text-slate-300">
+                                        {{ (item.productPrice / 100)|number_format(2, '.', ',') }} €
+                                    </td>
+                                    <td class="px-6 py-4 text-center font-bold text-sm text-slate-900 dark:text-white">
+                                        {{ item.quantity }}
+                                    </td>
+                                    <td class="px-6 py-4 text-right font-bold text-sm text-slate-900 dark:text-slate-100">
+                                        {{ ((item.productPrice * item.quantity) / 100)|number_format(2, '.', ',') }} €
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded shadow-sm border border-slate-200 dark:border-slate-700">
+                        <h3 class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-4">Shipping Address</h3>
+                        <p class="font-bold text-slate-900 dark:text-slate-100 mb-1">{{ app.user.firstname }} {{ app.user.lastname }}</p>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                            123 Innovation Drive<br/>
+                            Suite 400<br/>
+                            Berlin, 10115<br/>
+                            Germany
+                        </p>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded shadow-sm border border-slate-200 dark:border-slate-700">
+                        <h3 class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-4">Billing Address</h3>
+                        <p class="font-bold text-slate-900 dark:text-slate-100 mb-1">{{ app.user.firstname }} {{ app.user.lastname }}</p>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                            123 Innovation Drive<br/>
+                            Suite 400<br/>
+                            Berlin, 10115<br/>
+                            Germany
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-white dark:bg-slate-800 p-6 rounded shadow-sm border border-slate-200 dark:border-slate-700">
+                    <h2 class="text-lg font-bold mb-6 border-b border-slate-100 dark:border-slate-700 pb-4 text-slate-900 dark:text-white">Order Summary</h2>
+                    <div class="space-y-4">
+                        <div class="flex justify-between text-sm text-slate-600 dark:text-slate-400">
+                            <span>Subtotal</span>
+                            <span class="font-medium text-slate-900 dark:text-slate-100">{{ (order.total / 100)|number_format(2, '.', ',') }} €</span>
+                        </div>
+                        <div class="flex justify-between text-sm text-slate-600 dark:text-slate-400">
+                            <span>Shipping</span>
+                            <span class="font-bold text-primary">0.00 €</span>
+                        </div>
+                        <div class="flex justify-between text-sm text-slate-600 dark:text-slate-400">
+                            <span>Tax (VAT 20%)</span>
+                            <span class="font-medium text-slate-900 dark:text-slate-100">Included</span>
+                        </div>
+                        <div class="pt-6 border-t border-slate-100 dark:border-slate-700">
+                            <div class="flex justify-between items-baseline">
+                                <span class="text-xs font-bold uppercase tracking-widest text-slate-900 dark:text-slate-100">Order Total</span>
+                                <span class="text-3xl font-black text-primary">{{ (order.total / 100)|number_format(2, '.', ',') }} €</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-primary/5 dark:bg-primary/10 border border-primary/20 p-6 rounded flex flex-col items-center text-center">
+                    <span class="material-symbols-outlined text-primary text-3xl mb-2">support_agent</span>
+                    <h3 class="font-bold text-slate-900 dark:text-slate-100 mb-1 text-sm">Need Help?</h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">If you have any questions regarding your order, please contact our 24/7 support.</p>
+                    <button class="w-full py-2.5 border border-primary text-primary font-bold text-[10px] uppercase tracking-widest rounded hover:bg-primary hover:text-white transition-all">
+                        Contact Support
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

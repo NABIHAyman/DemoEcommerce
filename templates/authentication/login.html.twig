@@ -1,82 +1,72 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Login</title>
-</head>
-<body>
+{% extends 'base.html.twig' %}
 
-<h1>E-commerce Login</h1>
+{% block title %}Sign In | Minimalist Store{% endblock %}
 
-{#
-Gestion des erreurs d'authentification native de Symfony.
-Si le pare-feu rejette les identifiants lors du POST, la variable 'error' est injectée dans la vue.
-Le filtre '|trans' utilise le dictionnaire 'security' de Symfony pour afficher un message propre
-(ex: "Invalid credentials.") sans révéler de détails techniques à l'utilisateur.
-#}
-{% if error %}
-    <div style="color: red;">
-        {{ error.messageKey|trans(error.messageData, 'security') }}
+{% block body %}
+    <div class="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="w-full max-w-[480px] bg-white dark:bg-slate-900 rounded-xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.05)] overflow-hidden border border-slate-100 dark:border-slate-800">
+
+            <div class="flex border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+                <div class="flex-1 py-4 text-center text-sm font-bold border-b-2 border-primary text-slate-900 dark:text-white cursor-default">
+                    Sign In
+                </div>
+                <a href="{{ path('app_register') }}" class="flex-1 py-4 text-center text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-all">
+                    Register
+                </a>
+            </div>
+
+            <div class="p-8">
+                <div class="mb-8">
+                    <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Welcome Back</h1>
+                    <p class="text-slate-500 dark:text-slate-400 mt-1 text-sm">Please enter your details to access your account.</p>
+                </div>
+
+                {# Gestion des erreurs de sécurité Symfony #}
+                {% if error %}
+                    <div class="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-r text-sm text-red-700 dark:text-red-400 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-lg">error</span>
+                        {{ error.messageKey|trans(error.messageData, 'security') }}
+                    </div>
+                {% endif %}
+
+                <form method="post" class="space-y-5">
+                    <div>
+                        <label for="username" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                            Email Address
+                        </label>
+                        <input type="email" value="{{ last_username }}" name="_username" id="username" autocomplete="email" required autofocus
+                               class="w-full px-4 py-3 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-slate-400 text-sm"
+                               placeholder="name@company.com">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-1.5">
+                            <label for="password" class="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                Password
+                            </label>
+                            <a href="{{ path('app_forgot_password') }}" class="text-xs font-semibold text-primary hover:underline">Forgot password?</a>
+                        </div>
+                        <div class="relative">
+                            <input type="password" name="_password" id="password" autocomplete="current-password" required
+                                   class="w-full px-4 py-3 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-slate-400 text-sm"
+                                   placeholder="••••••••">
+                        </div>
+                    </div>
+
+                    {# Token CSRF de sécurité obligatoire #}
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                    <button type="submit" class="w-full py-3.5 bg-slate-900 hover:bg-primary dark:bg-primary dark:hover:bg-primary/90 text-white font-bold rounded shadow-lg shadow-primary/20 mt-4 uppercase tracking-widest text-sm transition-all flex justify-center items-center gap-2 group">
+                        Sign In
+                        <span class="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                    </button>
+                </form>
+
+                <p class="text-center text-sm text-slate-500 dark:text-slate-400 mt-8">
+                    Don't have an account yet?
+                    <a href="{{ path('app_register') }}" class="text-primary font-bold hover:underline">Create account</a>
+                </p>
+            </div>
+        </div>
     </div>
-{% endif %}
-
-{#
-Lecture du FlashBag de la session HTTP (app.flashes).
-C'est ici qu'apparaîtront les messages de succès verts ("Your password has been successfully reset")
-ou les erreurs rouges envoyés par notre ResetPasswordController juste avant la redirection (pattern PRG).
-#}
-{% for message in app.flashes('success') %}
-    <div style="color: green;">{{ message }}</div>
-{% endfor %}
-{% for message in app.flashes('error') %}
-    <div style="color: red;">{{ message }}</div>
-{% endfor %}
-
-{#
-Le formulaire n'a pas d'attribut 'action'. Il soumet donc en POST sur la route actuelle (/login).
-C'est le composant "form_login" défini dans notre security.yaml qui va intercepter magiquement
-cette requête HTTP POST avant même qu'elle n'atteigne le AuthenticationController.
-#}
-<form method="post">
-
-    <div>
-        <label for="username">Email address</label>
-        {#
-        L'attribut name="_username" est la clé exacte que le pare-feu Symfony va chercher.
-        L'injection de 'last_username' (passé par le contrôleur) est une best practice d'UX :
-        elle évite à l'utilisateur de devoir retaper son email s'il s'est trompé de mot de passe.
-        #}
-        <input type="email" value="{{ last_username }}" name="_username" id="username" autocomplete="email" required autofocus>
-    </div>
-
-    <div>
-        <label for="password">Password</label>
-        {# L'attribut name="_password" est la seconde clé obligatoire pour le pare-feu. #}
-        <input type="password" name="_password" id="password" autocomplete="current-password" required>
-    </div>
-
-    {#
-    CRUCIAL - Jeton CSRF (Cross-Site Request Forgery).
-    Cette fonction Twig génère un token cryptographique unique lié à la session de l'utilisateur.
-    Il empêche un site malveillant tiers de forger une fausse requête POST de connexion à l'insu de l'utilisateur.
-    L'identifiant 'authenticate' est le nom de l'intention attendue par défaut par Symfony.
-    #}
-    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-
-    <button type="submit">Sign in</button>
-
-    <a href="{{ path('app_register') }}" style="display: block; text-align: center; margin-top: 15px;">Don't have an account? Sign up</a>
-
-    <div style="margin-top: 10px;">
-        {#
-        Génération dynamique de l'URL absolue/relative via la fonction path() de Twig.
-        On utilise la nomenclature anglaise définie dans le contrôleur (app_forgot_password).
-        Ceci garantit que si l'on modifie l'URL physique dans l'attribut #[Route], ce lien ne cassera pas.
-        #}
-        <a href="{{ path('app_forgot_password') }}">Forgot password?</a>
-    </div>
-
-</form>
-
-</body>
-</html>
+{% endblock %}

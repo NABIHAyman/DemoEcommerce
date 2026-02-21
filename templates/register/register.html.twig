@@ -1,52 +1,63 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Create an Account</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; background-color: #f4f7f6; }
-        .form-container { max-width: 400px; margin: 40px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; color: #333; }
-        input[type="text"], input[type="email"], input[type="password"] { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-        button { width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 1em; }
-        button:hover { background-color: #218838; }
-        .login-link { text-align: center; margin-top: 20px; display: block; text-decoration: none; color: #007bff; }
-    </style>
-</head>
-<body>
+{% extends 'base.html.twig' %}
 
-<div class="form-container">
-    <h1 style="text-align: center; margin-top: 0;">Sign Up</h1>
+{% block title %}Create Account | Minimalist Store{% endblock %}
 
-    {# Le formulaire renvoie en POST vers l'URL courante (/register) #}
-    <form method="post">
-        <div class="form-group">
-            <label for="firstname">First Name</label>
-            <input type="text" id="firstname" name="firstname" required autofocus>
+{% block body %}
+    <div class="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="w-full max-w-[480px] bg-white dark:bg-slate-900 rounded-xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.05)] overflow-hidden border border-slate-100 dark:border-slate-800">
+
+            <div class="flex border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+                <a href="{{ path('app_login') }}" class="flex-1 py-4 text-center text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-all">
+                    Sign In
+                </a>
+                <div class="flex-1 py-4 text-center text-sm font-bold border-b-2 border-primary text-slate-900 dark:text-white cursor-default">
+                    Register
+                </div>
+            </div>
+
+            <div class="p-8">
+                <div class="mb-8">
+                    <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Join Us</h1>
+                    <p class="text-slate-500 dark:text-slate-400 mt-1 text-sm">Get started with your free account today.</p>
+                </div>
+
+                <form method="post" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="firstname" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">First Name</label>
+                            <input type="text" id="firstname" name="firstname" required autofocus
+                                   class="w-full px-4 py-3 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-slate-400 text-sm">
+                        </div>
+                        <div>
+                            <label for="lastname" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Last Name</label>
+                            <input type="text" id="lastname" name="lastname" required
+                                   class="w-full px-4 py-3 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-slate-400 text-sm">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="email" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Email Address</label>
+                        <input type="email" id="email" name="email" required placeholder="name@company.com"
+                               class="w-full px-4 py-3 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-slate-400 text-sm">
+                    </div>
+
+                    <div>
+                        <label for="password" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Password</label>
+                        <input type="password" id="password" name="password" required minlength="6" placeholder="••••••••"
+                               class="w-full px-4 py-3 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-slate-400 text-sm">
+                    </div>
+
+                    <button type="submit" class="w-full py-3.5 bg-slate-900 hover:bg-primary dark:bg-primary dark:hover:bg-primary/90 text-white font-bold rounded shadow-lg shadow-primary/20 mt-6 uppercase tracking-widest text-sm transition-all flex justify-center items-center gap-2 group">
+                        Create Account
+                        <span class="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">person_add</span>
+                    </button>
+                </form>
+
+                <p class="text-center text-sm text-slate-500 dark:text-slate-400 mt-6">
+                    Already have an account?
+                    <a href="{{ path('app_login') }}" class="text-primary font-bold hover:underline">Log in here</a>
+                </p>
+            </div>
         </div>
-
-        <div class="form-group">
-            <label for="lastname">Last Name</label>
-            <input type="text" id="lastname" name="lastname" required>
-        </div>
-
-        <div class="form-group">
-            <label for="email">Email Address</label>
-            <input type="email" id="email" name="email" required>
-        </div>
-
-        <div class="form-group">
-            <label for="password">Password</label>
-            {# Validation Front-end basique pour éviter les requêtes réseau inutiles #}
-            <input type="password" id="password" name="password" required minlength="6">
-        </div>
-
-        <button type="submit">Create Account</button>
-    </form>
-
-    <a href="{{ path('app_login') }}" class="login-link">Already have an account? Log in here.</a>
-</div>
-
-</body>
-</html>
+    </div>
+{% endblock %}

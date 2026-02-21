@@ -1,123 +1,79 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Product Catalog</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; }
-        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .logout-btn { color: red; text-decoration: none; font-weight: bold; }
-    </style>
-</head>
-<body>
+{% extends 'base.html.twig' %}
 
-<div style="display: flex; justify-content: space-between; align-items: center;">
+{% block title %}Our Catalog | Minimalist Store{% endblock %}
 
-    {#
-    Affichage dynamique sécurisé.
-    L'objet 'user' (qui implémente UserInterface) nous a été passé par le ProductController.
-    La sécurité est intégrée : Twig gère automatiquement l'échappement (escaping) des variables
-    comme 'user.firstname' pour neutraliser par défaut toute tentative de faille XSS (Cross-Site Scripting).
-    #}
-    <h1>Welcome, {{ app.user.firstname }}!</h1>
-
-    <div>
-        {# Le nouveau lien vers le profil #}
-        <a href="{{ path('app_user_profile') }}" style="margin-right: 15px; font-weight: bold; text-decoration: none;">My Profile</a>
-        <a href="{{ path('app_logout') }}" class="logout-btn">Sign out</a>
+{% block body %}
+    <div class="mb-4">
+        <h2 class="text-4xl font-light tracking-tight text-slate-900 dark:text-white">Our Collection</h2>
+        <p class="mt-2 text-slate-500 dark:text-slate-400 text-sm">Sustainable essentials for the modern wardrobe.</p>
     </div>
 
-    {#
-    Le lien de déconnexion pointe vers la route 'app_logout'.
-    Concept architectural : Ce n'est pas notre contrôleur qui va gérer la déconnexion,
-    c'est le pare-feu (Firewall) de sécurité de Symfony qui va intercepter cette requête,
-    détruire le cookie de session (PHPSESSID), purger le contexte de sécurité,
-    et nous rediriger proprement vers la page de login.
-    #}
-    <a href="{{ path('app_logout') }}" class="logout-btn">Sign out</a>
-</div>
+    <section class="mb-12 flex flex-wrap items-center justify-between gap-4 py-4 border-y border-primary/10">
+        <div class="flex flex-wrap items-center gap-4">
+            <span class="text-sm font-bold uppercase tracking-widest text-slate-500 mr-2">Filter by Category:</span>
 
-<h2>Our Catalog</h2>
+            {# Bouton "All Products" #}
+            <a href="{{ path('app_products') }}" class="flex items-center gap-2 px-4 py-2 border rounded shadow-sm transition-all text-sm font-medium {% if current_category is null %}bg-slate-900 text-white border-slate-900 dark:bg-primary dark:border-primary{% else %}bg-white text-slate-700 border-slate-200 hover:border-primary dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700{% endif %}">
+                All
+            </a>
 
-{# --- BARRE DE NAVIGATION DES CATÉGORIES --- #}
-<div style="margin-bottom: 20px; padding: 10px; background-color: #f8f9fa; border: 1px solid #ddd; border-radius: 5px;">
-    <strong>Filter by Category:</strong>
+            {# Boucle sur les catégories de la BDD #}
+            {% for cat in categories %}
+                <a href="{{ path('app_products_by_category', {'id': cat.id}) }}" class="flex items-center gap-2 px-4 py-2 border rounded shadow-sm transition-all text-sm font-medium {% if current_category and current_category.id == cat.id %}bg-slate-900 text-white border-slate-900 dark:bg-primary dark:border-primary{% else %}bg-white text-slate-700 border-slate-200 hover:border-primary dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700{% endif %}">
+                    {{ cat.name }}
+                </a>
+            {% endfor %}
+        </div>
 
-    {# Lien pour réinitialiser le filtre (retourner au catalogue complet) #}
-    <a href="{{ path('app_products') }}"
-       style="margin-left: 10px; text-decoration: none; padding: 5px; {% if current_category is null %}font-weight: bold; color: black; border-bottom: 2px solid black;{% else %}color: #007bff;{% endif %}">
-        All Products
-    </a>
+        <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-400 uppercase tracking-widest font-semibold mr-2">Sort by</span>
+            <button class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded shadow-sm hover:border-primary transition-all text-sm font-medium">
+                Newest <span class="material-symbols-outlined text-sm">swap_vert</span>
+            </button>
+        </div>
+    </section>
 
-    {# Boucle dynamique sur toutes les catégories de la base de données #}
-    {% for cat in categories %}
-        <a href="{{ path('app_products_by_category', {'id': cat.id}) }}"
-           style="margin-left: 10px; text-decoration: none; padding: 5px; {% if current_category and current_category.id == cat.id %}font-weight: bold; color: black; border-bottom: 2px solid black;{% else %}color: #007bff;{% endif %}">
-            {{ cat.name }}
-        </a>
-    {% endfor %}
-</div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+        {% for product in products %}
+            <div class="group bg-white dark:bg-slate-800 rounded-sm shadow-[0_4px_6px_rgba(0,0,0,0.05)] hover:shadow-xl transition-shadow overflow-hidden flex flex-col h-full">
 
-<table>
-    <thead>
-    <tr>
-        <th>Product Name</th>
-        <th>Category</th>
-        <th>Description</th>
-        <th>Price</th>
-        <th>Action</th>
-    </tr>
-    </thead>
-    <tbody>
+                <a href="{{ path('app_product_show', {'id': product.id}) }}" class="relative aspect-[4/5] overflow-hidden bg-slate-100 block">
+                    {# Image dynamique générée avec un seed fixe basé sur l'ID #}
+                    <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://picsum.photos/seed/{{ product.id }}/400/500" alt="{{ product.name }}">
 
-    {#
-    Boucle itérative Twig sur le tableau (ou ArrayCollection) retourné par Doctrine.
-    Excellente pratique UX/UI : l'utilisation de la clause '{% else %}' intégrée
-    qui gère nativement le cas (edge case) où le catalogue est vide,
-    ce qui évite d'afficher un tableau vide et cassé à l'utilisateur.
-    #}
-    {% for product in products %}
-        <tr>
-            <td>
-                <strong>
-                    <a href="{{ path('app_product_show', {'id': product.id}) }}" style="color: black; text-decoration: underline;">
-                        {{ product.name }}
+                    {% if product.isTop %}
+                        <div class="absolute top-4 left-4">
+                            <span class="bg-primary text-white text-[10px] font-bold px-2 py-1 uppercase tracking-widest rounded-sm">Top</span>
+                        </div>
+                    {% endif %}
+                </a>
+
+                <div class="p-6 flex flex-col grow">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[10px] text-primary uppercase font-bold tracking-widest">{{ product.category.name }}</span>
+                        <span class="text-lg font-bold text-slate-900 dark:text-white">{{ (product.price / 100)|number_format(2, '.', ',') }} €</span>
+                    </div>
+
+                    <a href="{{ path('app_product_show', {'id': product.id}) }}">
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white leading-tight mb-2 hover:text-primary transition-colors">{{ product.name }}</h3>
                     </a>
-                </strong>
-            </td>
 
-            {#
-            Magie de l'ORM Doctrine : Le "Lazy Loading" (Chargement différé).
-            On accède à la propriété 'name' de l'entité Category via la relation ManyToOne de Product.
-            Même si la catégorie n'était pas directement jointe dans la requête SQL initiale,
-            Doctrine va automatiquement exécuter une requête transparente pour récupérer la donnée.
-            #}
-            <td>{{ product.category.name }}</td>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mb-6 line-clamp-2">{{ product.description }}</p>
 
-            <td>{{ product.description }}</td>
-
-            {#
-            Ingénierie E-commerce standard : Gestion des flottants (Floating Point Math).
-            Puisque la base de données stocke le prix en centimes (entier / Integer) pour éviter
-            les fameuses erreurs d'arrondis monétaires de l'architecture CPU, on doit le diviser par 100
-            uniquement au moment de la présentation (la Vue).
-            Le filtre '|number_format' applique ensuite le formatage d'affichage.
-            #}
-            <td>{{ (product.price / 100)|number_format(2, '.', ',') }} €</td>
-
-            <td>
-                <a href="{{ path('app_cart_add', {'id': product.id}) }}" style="background: green; color: white; padding: 5px 10px; text-decoration: none;">Add to Cart</a>
-            </td>
-        </tr>
-    {% else %}
-        <tr>
-            <td colspan="4">No products available at the moment.</td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
-
-</body>
-</html>
+                    <div class="mt-auto">
+                        <a href="{{ path('app_cart_add', {'id': product.id}) }}" class="w-full bg-slate-900 hover:bg-primary dark:bg-primary dark:hover:bg-primary/90 text-white py-3 rounded-sm font-bold text-sm tracking-widest uppercase transition-all flex items-center justify-center gap-2 group/btn">
+                            <span class="material-symbols-outlined text-lg">shopping_cart</span>
+                            Add to Cart
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-span-full py-20 text-center text-slate-500">
+                <span class="material-symbols-outlined text-5xl mb-4 opacity-30">inventory_2</span>
+                <h3 class="text-xl font-bold mb-2">No products found</h3>
+                <p>We couldn't find any products in this category at the moment.</p>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
