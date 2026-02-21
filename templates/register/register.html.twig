@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Create an Account</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background-color: #f4f7f6; }
+        .form-container { max-width: 400px; margin: 40px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #333; }
+        input[type="text"], input[type="email"], input[type="password"] { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 1em; }
+        button:hover { background-color: #218838; }
+        .login-link { text-align: center; margin-top: 20px; display: block; text-decoration: none; color: #007bff; }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h1 style="text-align: center; margin-top: 0;">Sign Up</h1>
+
+    {# Le formulaire renvoie en POST vers l'URL courante (/register) #}
+    <form method="post">
+        <div class="form-group">
+            <label for="firstname">First Name</label>
+            <input type="text" id="firstname" name="firstname" required autofocus>
+        </div>
+
+        <div class="form-group">
+            <label for="lastname">Last Name</label>
+            <input type="text" id="lastname" name="lastname" required>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            {# Validation Front-end basique pour éviter les requêtes réseau inutiles #}
+            <input type="password" id="password" name="password" required minlength="6">
+        </div>
+
+        <button type="submit">Create Account</button>
+    </form>
+
+    <a href="{{ path('app_login') }}" class="login-link">Already have an account? Log in here.</a>
+</div>
+
+</body>
+</html>

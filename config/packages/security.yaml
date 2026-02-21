@@ -65,6 +65,8 @@ security:
         # PUBLIC_ACCESS : On permet à tout le monde d'accéder à la page de login,
         # sinon on aurait une boucle de redirection infinie.
         - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/forgot-password, roles: PUBLIC_ACCESS }
+        - { path: ^/register, roles: PUBLIC_ACCESS }
 
         # ROLE_USER : Toutes les URLs commençant par /products demandent au minimum
         # que l'utilisateur soit authentifié et possède le rôle de base.
