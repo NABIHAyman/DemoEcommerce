@@ -1,0 +1,24 @@
+# 🌿 Minimalist Store (Symfony 7)
+
+Une plateforme e-commerce épurée axée sur l'essentiel : performance, design minimaliste et architecture robuste.
+
+## 🚀 Stack Technique
+- **Framework :** Symfony 7 (PHP 8.2+)
+- **Base de données :** MySQL 8
+- **Frontend :** Twig & Tailwind CSS (CDN)
+- **Icons :** Google Material Symbols
+
+## 🛠️ Fonctionnalités actuelles
+- [x] **Catalogue :** Filtrage par catégorie, fiches produits dynamiques (Images générées via Picsum).
+- [x] **Auth :** Inscription, Connexion, Sécurité native (Argon2id).
+- [x] **Panier :** Gestion en session via un `CartService` dédié (Complexité O(1)).
+- [x] **Commandes :** Système de "Snapshot" (historisation immuable du prix et du nom du produit).
+- [x] **Profil :** Dashboard utilisateur, historique des commandes et détails de facturation.
+
+## ⚙️ Installation
+1. `composer install`
+2. Configurer le `.env.local` (ajuster `DATABASE_URL`)
+3. `php bin/console doctrine:database:create`
+4. `php bin/console doctrine:migrations:migrate`
+5. `php bin/console doctrine:fixtures:load --append` *(Pour générer le catalogue de test)*
+6. `symfony server:start`
