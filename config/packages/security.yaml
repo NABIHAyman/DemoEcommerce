@@ -70,9 +70,11 @@ security:
 
         - { path: ^/admin, roles: ROLE_ADMIN }
 
-        # ROLE_USER : Toutes les URLs commençant par /products demandent au minimum
-        # que l'utilisateur soit authentifié et possède le rôle de base.
+        - { path: ^/profile, roles: ROLE_USER }
+
         - { path: ^/products, roles: ROLE_USER }
+        - { path: ^/product/, roles: ROLE_USER }
+        - { path: ^/categories, roles: ROLE_USER }
 
 # CONFIGURATION SPÉCIFIQUE POUR LES TESTS UNITAIRES ET FONCTIONNELS
 # On réduit au maximum la puissance du hachage pour accélérer l'exécution des tests.

@@ -1,12 +1,3 @@
-{#
-Calcul dynamique du nombre d'articles dans le panier depuis la session.
-On additionne les quantités plutôt que de juste compter les lignes.
-#}
-{% set cart_count = 0 %}
-{% for id, quantity in app.session.get('cart', []) %}
-    {% set cart_count = cart_count + quantity %}
-{% endfor %}
-
 <!DOCTYPE html>
 <html lang="en" class="light">
 <head>
@@ -71,8 +62,8 @@ On additionne les quantités plutôt que de juste compter les lignes.
 
         <nav class="hidden md:flex items-center gap-10">
             <a href="{{ path('app_products') }}" class="text-sm font-medium hover:text-primary transition-colors uppercase tracking-widest">Catalog</a>
+            <a href="{{ path('app_browse_categories') }}" class="text-sm font-medium hover:text-primary transition-colors uppercase tracking-widest">Categories</a>
 
-            {# Lien dynamique vers le profil ou le login #}
             {% if app.user %}
                 <a href="{{ path('app_user_profile') }}" class="text-sm font-medium hover:text-primary transition-colors uppercase tracking-widest">My Profile</a>
             {% else %}
@@ -81,6 +72,12 @@ On additionne les quantités plutôt que de juste compter les lignes.
         </nav>
 
         <div class="flex items-center gap-6">
+            {% if app.user %}
+                <span class="hidden sm:inline text-sm font-medium text-slate-700 dark:text-slate-300">
+                    Bienvenue, {{ app.user.firstname }} !
+                </span>
+            {% endif %}
+
             <a href="{{ app.user ? path('app_user_profile') : path('app_login') }}" class="hover:text-primary transition-colors" title="{{ app.user ? 'My Profile' : 'Login' }}">
                 <span class="material-symbols-outlined">person</span>
             </a>
@@ -95,8 +92,9 @@ On additionne les quantités plutôt que de juste compter les lignes.
             </a>
 
             {% if app.user %}
-                <a href="{{ path('app_logout') }}" class="hover:text-red-500 transition-colors text-slate-400" title="Logout">
+                <a href="{{ path('app_logout') }}" class="flex items-center gap-1 hover:text-red-500 transition-colors text-slate-400" title="Logout">
                     <span class="material-symbols-outlined">logout</span>
+                    <span class="hidden sm:inline text-xs font-medium uppercase tracking-widest">Logout</span>
                 </a>
             {% endif %}
         </div>
@@ -145,6 +143,7 @@ On additionne les quantités plutôt que de juste compter les lignes.
             <h4 class="text-xs font-bold uppercase tracking-[0.2em] mb-6">Shop</h4>
             <ul class="space-y-4 text-sm text-slate-500 dark:text-slate-400">
                 <li><a class="hover:text-primary transition-colors" href="{{ path('app_products') }}">Catalog</a></li>
+                <li><a class="hover:text-primary transition-colors" href="{{ path('app_browse_categories') }}">Categories</a></li>
                 <li><a class="hover:text-primary transition-colors" href="{{ path('app_cart_index') }}">My Cart</a></li>
             </ul>
         </div>

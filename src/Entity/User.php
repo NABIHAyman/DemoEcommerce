@@ -8,6 +8,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use App\Repository\UserRepository;
 
+use Symfony\Component\Validator\Constraints as Assert;
+
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
@@ -17,18 +19,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
+    #[Assert\NotBlank(message: 'Please provide an email address.')]
+    #[Assert\Email(message: 'The email {{ value }} is not a valid email.')]
     private ?string $email = null;
 
     #[ORM\Column]
     private array $roles = [];
 
     #[ORM\Column]
+    #[Assert\NotBlank(message: 'Le mot de passe est requis.')]
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Le prénom est requis')]
+    #[Assert\Length(min: 2, minMessage: 'Votre prénom doit comporter au moins plus de {{ limit }} caractères')]
     private ?string $firstname = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Last name is required.')]
+    #[Assert\Length(min: 2, minMessage: 'Votre nom doit comporter au moins plus de {{ limit }} caractères')]
     private ?string $lastname = null;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Order::class)]

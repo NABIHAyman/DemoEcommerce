@@ -7,25 +7,19 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Entity\Order;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class ProfileController extends AbstractController
 {
     /**
      * Route de l'espace personnel (Tableau de bord de l'utilisateur).
      */
+    #[IsGranted('ROLE_USER')]
     #[Route('/profile', name: 'app_user_profile')]
     public function index(): Response
     {
-        // 1. Barrière de sécurité : On s'assure que seul un utilisateur authentifié accède ici.
         $user = $this->getUser();
 
-        if (!$user) {
-            // Si la session a expiré ou que c'est un visiteur anonyme, on le renvoie au login.
-            return $this->redirectToRoute('app_login');
-        }
-
-        // 2. Rendu de la vue.
-        // On passe simplement l'objet User. Doctrine s'occupera de charger la collection 'orders' à la volée.
         return $this->render('profile/index.html.twig', [
             'user' => $user,
         ]);
@@ -34,6 +28,7 @@ class ProfileController extends AbstractController
     /**
      * Route affichant les détails d'une commande spécifique.
      */
+    #[IsGranted('ROLE_USER')]
     #[Route('/profile/order/{id}', name: 'app_profile_order_show')]
     public function showOrder(Order $order): Response
     {
@@ -52,11 +47,11 @@ class ProfileController extends AbstractController
     /**
      * Route affichant l'historique complet avec pagination manuelle.
      */
+    #[IsGranted('ROLE_USER')]
     #[Route('/profile/orders', name: 'app_profile_orders_history')]
     public function ordersHistory(Request $request, \App\Repository\OrderRepository $orderRepository): Response
     {
         $user = $this->getUser();
-        if (!$user) return $this->redirectToRoute('app_login');
 
         // 1. Paramètres de pagination
         // On récupère le paramètre ?page= dans l'URL. S'il n'existe pas, c'est 1 par défaut.

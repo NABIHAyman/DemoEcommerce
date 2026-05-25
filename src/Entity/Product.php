@@ -31,6 +31,9 @@ class Product
     #[ORM\JoinColumn(nullable: false)]
     private ?Category $category = null;
 
+    #[ORM\OneToOne(mappedBy: 'product', targetEntity: ProductStats::class, cascade: ['persist'], orphanRemoval: true)]
+    private ?ProductStats $stats = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -103,6 +106,22 @@ class Product
     public function setCategory(?Category $category): static
     {
         $this->category = $category;
+        return $this;
+    }
+
+    public function getStats(): ?ProductStats
+    {
+        return $this->stats;
+    }
+
+    public function setStats(?ProductStats $stats): static
+    {
+        if ($stats !== null && $stats->getProduct() !== $this) {
+            $stats->setProduct($this);
+        }
+
+        $this->stats = $stats;
+
         return $this;
     }
 }
