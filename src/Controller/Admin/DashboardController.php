@@ -36,7 +36,7 @@ class DashboardController extends AbstractController
             'total_products' => $totalProducts,
             'total_users' => $totalUsers,
             'revenue' => $revenue,
-            'recent_orders' => $orderRepository->findBy([], ['createdAt' => 'DESC'], 5) // Les 5 dernières
+            'recent_orders' => $orderRepository->findBy([], ['createdAt' => 'DESC'], 5), // Les 5 dernières
         ]);
     }
 }

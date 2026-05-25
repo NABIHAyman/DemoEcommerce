@@ -13,23 +13,33 @@
             <span class="text-sm font-bold uppercase tracking-widest text-slate-500 mr-2">Filter by Category:</span>
 
             {# Bouton "All Products" #}
-            <a href="{{ path('app_products') }}" class="flex items-center gap-2 px-4 py-2 border rounded shadow-sm transition-all text-sm font-medium {% if current_category is null %}bg-slate-900 text-white border-slate-900 dark:bg-primary dark:border-primary{% else %}bg-white text-slate-700 border-slate-200 hover:border-primary dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700{% endif %}">
+            <a href="{{ path('app_products', {sort: current_sort|default('popular')}) }}" class="flex items-center gap-2 px-4 py-2 border rounded shadow-sm transition-all text-sm font-medium {% if current_category is null %}bg-slate-900 text-white border-slate-900 dark:bg-primary dark:border-primary{% else %}bg-white text-slate-700 border-slate-200 hover:border-primary dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700{% endif %}">
                 All
             </a>
 
-            {# Boucle sur les catégories de la BDD #}
             {% for cat in categories %}
-                <a href="{{ path('app_products_by_category', {'id': cat.id}) }}" class="flex items-center gap-2 px-4 py-2 border rounded shadow-sm transition-all text-sm font-medium {% if current_category and current_category.id == cat.id %}bg-slate-900 text-white border-slate-900 dark:bg-primary dark:border-primary{% else %}bg-white text-slate-700 border-slate-200 hover:border-primary dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700{% endif %}">
+                <a href="{{ path('app_products_by_category', {id: cat.id, sort: current_sort|default('popular')}) }}" class="flex items-center gap-2 px-4 py-2 border rounded shadow-sm transition-all text-sm font-medium {% if current_category and current_category.id == cat.id %}bg-slate-900 text-white border-slate-900 dark:bg-primary dark:border-primary{% else %}bg-white text-slate-700 border-slate-200 hover:border-primary dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700{% endif %}">
                     {{ cat.name }}
                 </a>
             {% endfor %}
         </div>
 
         <div class="flex items-center gap-2">
-            <span class="text-xs text-slate-400 uppercase tracking-widest font-semibold mr-2">Sort by</span>
-            <button class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded shadow-sm hover:border-primary transition-all text-sm font-medium">
-                Newest <span class="material-symbols-outlined text-sm">swap_vert</span>
-            </button>
+            <label for="product-sort" class="text-xs text-slate-400 uppercase tracking-widest font-semibold">Sort by</label>
+            <form method="get"
+                  action="{{ current_category ? path('app_products_by_category', {id: current_category.id}) : path('app_products') }}"
+                  class="inline-block">
+                <select id="product-sort"
+                        name="sort"
+                        onchange="this.form.submit()"
+                        class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm rounded shadow-sm py-2 pl-3 pr-8 focus:ring-primary focus:border-primary min-w-[180px]">
+                    <option value="popular" {% if current_sort == 'popular' %}selected{% endif %}>Top Populaires</option>
+                    <option value="purchases" {% if current_sort == 'purchases' %}selected{% endif %}>Best Sellers</option>
+                    <option value="views" {% if current_sort == 'views' %}selected{% endif %}>Most Viewed</option>
+                    <option value="price_asc" {% if current_sort == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+                    <option value="price_desc" {% if current_sort == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+                </select>
+            </form>
         </div>
     </section>
 
@@ -58,7 +68,13 @@
                         <h3 class="text-lg font-bold text-slate-900 dark:text-white leading-tight mb-2 hover:text-primary transition-colors">{{ product.name }}</h3>
                     </a>
 
-                    <p class="text-sm text-slate-500 dark:text-slate-400 mb-6 line-clamp-2">{{ product.description }}</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mb-2 line-clamp-2">{{ product.description }}</p>
+
+                    <p class="text-[10px] text-slate-400 dark:text-slate-500 mb-4 uppercase tracking-wider">
+                        {{ product.stats ? product.stats.viewCount : 0 }} vues ·
+                        {{ product.stats ? product.stats.addToCartCount : 0 }} paniers ·
+                        {{ product.stats ? product.stats.purchaseCount : 0 }} achats
+                    </p>
 
                     <div class="mt-auto">
                         <a href="{{ path('app_cart_add', {'id': product.id}) }}" class="w-full bg-slate-900 hover:bg-primary dark:bg-primary dark:hover:bg-primary/90 text-white py-3 rounded-sm font-bold text-sm tracking-widest uppercase transition-all flex items-center justify-center gap-2 group/btn">

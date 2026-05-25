@@ -1,4 +1,3 @@
-
 ###> symfony/framework-bundle ###
 /.env.local
 /.env.local.php
@@ -9,17 +8,73 @@
 /vendor/
 ###< symfony/framework-bundle ###
 
-###> phpunit/phpunit ###
-/phpunit.xml
-/.phpunit.cache/
-###< phpunit/phpunit ###
-
 ###> symfony/asset-mapper ###
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
-/.idea
 
-###> lexik/jwt-authentication-bundle ###
-/config/jwt/*.pem
-###< lexik/jwt-authentication-bundle ###
+###> phpunit/phpunit ###
+/phpunit.xml
+/.phpunit.cache/
+/coverage/
+###< phpunit/phpunit ###
+
+###> php-cs-fixer ###
+/.php-cs-fixer.cache
+/.php-cs-fixer.php
+###< php-cs-fixer ###
+
+###> composer ###
+/composer.phar
+###< composer ###
+
+###> node (si tooling front ajouté plus tard) ###
+/node_modules/
+/npm-debug.log
+/yarn-error.log
+/yarn.lock
+/package-lock.json
+###< node ###
+
+###> docker / infra locale ###
+/compose.override.yaml
+/docker-compose.override.yml
+###< docker / infra locale ###
+
+###> IDE & éditeurs ###
+/.idea/
+/.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+###< IDE & éditeurs ###
+
+###> OS ###
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+###< OS ###
+
+###> fichiers temporaires / logs locaux ###
+*.log
+*.tmp
+*.temp
+*.bak
+*.orig
+NUL
+###< fichiers temporaires / logs locaux ###
+
+###> outils agent / doc locale (hors rendu prof) ###
+/.cursor/
+/docs/
+###< outils agent / doc locale (hors rendu prof) ###

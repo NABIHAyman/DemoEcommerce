@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
-use App\Service\CartService;
+use App\Cart\CartHandler;
+use App\Entity\Product;
+use App\Service\ProductStatsManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -10,9 +12,9 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/cart')]
 class CartController extends AbstractController
 {
-    // Injection du service métier via le constructeur
     public function __construct(
-        private CartService $cartService
+        private CartHandler $cartHandler,
+        private ProductStatsManager $productStatsManager,
     ) {
     }
 
@@ -22,18 +24,12 @@ class CartController extends AbstractController
     #[Route('/', name: 'app_cart_index')]
     public function index(): Response
     {
-        // On récupère le panier hydraté (avec les vrais objets Product) depuis notre service
-        $cart = $this->cartService->getFullCart();
-
-        // Calcul du total général du panier
-        $total = 0;
-        foreach ($cart as $item) {
-            $total += $item['product']->getPrice() * $item['quantity'];
-        }
+        // On récupère le panier hydraté (avec les vrais objets Product)
+        $cart = $this->cartHandler->getCart();
 
         return $this->render('cart/index.html.twig', [
             'cart' => $cart,
-            'total' => $total,
+            'total' => $cart->getTotal(),
         ]);
     }
 
@@ -41,12 +37,11 @@ class CartController extends AbstractController
      * Route d'action : Ajoute un produit et redirige vers le panier.
      */
     #[Route('/add/{id}', name: 'app_cart_add')]
-    public function add(int $id): Response
+    public function add(Product $product): Response
     {
-        // On délègue l'ajout à notre service métier
-        $this->cartService->add($id);
+        $this->cartHandler->addProduct($product);
+        $this->productStatsManager->recordAddToCart($product);
 
-        // Consigne du professeur : "une fois le produit ajouté, l’utilisateur est redirigé vers cette page (le panier)"
         return $this->redirectToRoute('app_cart_index');
     }
 
@@ -54,9 +49,9 @@ class CartController extends AbstractController
      * Route d'action : Supprime une ligne du panier.
      */
     #[Route('/remove/{id}', name: 'app_cart_remove')]
-    public function remove(int $id): Response
+    public function remove(Product $product): Response
     {
-        $this->cartService->remove($id);
+        $this->cartHandler->removeProduct($product);
 
         return $this->redirectToRoute('app_cart_index');
     }
@@ -66,6 +61,6 @@ class CartController extends AbstractController
      */
     public function clear(): void
     {
-        $this->requestStack->getSession()->remove('cart');
+        $this->cartHandler->clear();
     }
 }

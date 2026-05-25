@@ -7,7 +7,8 @@ use App\Entity\Order;
 use App\Entity\OrderItem;
 use App\Repository\AddressRepository;
 use App\Repository\CarrierRepository;
-use App\Service\CartService;
+use App\Cart\CartHandler;
+use App\Service\ProductStatsManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,13 +22,13 @@ class CheckoutController extends AbstractController
      * 1. ÉTAPE DE VÉRIFICATION ET AFFICHAGE DU CHECKOUT
      */
     #[Route('/', name: 'app_checkout')]
-    public function index(CartService $cartService, CarrierRepository $carrierRepository): Response
+    public function index(CartHandler $cartHandler, CarrierRepository $carrierRepository): Response
     {
         $user = $this->getUser();
         if (!$user) return $this->redirectToRoute('app_login');
 
-        $cart = $cartService->getFullCart();
-        if (empty($cart)) return $this->redirectToRoute('app_products');
+        $cart = $cartHandler->getCart();
+        if (empty($cart->items)) return $this->redirectToRoute('app_products');
 
         // Règle métier : Si le client n'a aucune adresse, on le force à en créer une d'abord
         if (count($user->getAddresses()) === 0) {
@@ -35,15 +36,18 @@ class CheckoutController extends AbstractController
             return $this->redirectToRoute('app_checkout_address_add');
         }
 
+        // ancienne logique (Cart était un tableau &items)
+        /*
         // Calcul du total du panier (sans livraison)
         $totalCart = 0;
         foreach ($cart as $item) {
             $totalCart += $item['product']->getPrice() * $item['quantity'];
         }
+        */
 
         return $this->render('checkout/index.html.twig', [
             'cart' => $cart,
-            'totalCart' => $totalCart,
+            'totalCart' => $cart->getTotal(), // Utilisation directe du DTO
             'addresses' => $user->getAddresses(),
             'carriers' => $carrierRepository->findAll()
         ]);
@@ -84,13 +88,15 @@ class CheckoutController extends AbstractController
     #[Route('/process', name: 'app_checkout_process', methods: ['POST'])]
     public function process(
         Request $request,
-        CartService $cartService,
+        CartHandler $cartHandler,
         AddressRepository $addressRepository,
         CarrierRepository $carrierRepository,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        ProductStatsManager $productStatsManager,
     ): Response {
         $user = $this->getUser();
-        $cart = $cartService->getFullCart();
+        $cart = $cartHandler->getCart();
+        if (empty($cart->items)) return $this->redirectToRoute('app_products');
 
         // Récupération des choix de l'utilisateur depuis le formulaire HTML
         $addressId = $request->request->get('address_id');
@@ -116,27 +122,32 @@ class CheckoutController extends AbstractController
         $order->setCarrierPrice($carrier->getPrice());
 
         $totalOrder = 0;
+        $purchaseStats = [];
 
-        // Boucle sur les produits (Snapshot des produits)
-        foreach ($cart as $item) {
+        foreach ($cart->items as $item) {
+            $totalOrder += $item->getSubtotal();
+            $purchaseStats[] = ['product' => $item->product, 'quantity' => $item->quantity];
+        }
+
+        $order->setTotal($totalOrder + $carrier->getPrice());
+        $entityManager->persist($order);
+
+        foreach ($cart->items as $item) {
             $orderItem = new OrderItem();
-            $orderItem->setProductName($item['product']->getName());
-            $orderItem->setProductPrice($item['product']->getPrice());
-            $orderItem->setQuantity($item['quantity']);
+            $orderItem->setProductName($item->product->getName());
+            $orderItem->setProductPrice($item->product->getPrice());
+            $orderItem->setQuantity($item->quantity);
             $orderItem->setOrderRef($order);
 
             $entityManager->persist($orderItem);
-
-            $totalOrder += ($item['product']->getPrice() * $item['quantity']);
         }
 
-        // Le prix total = Prix des produits + Prix du transporteur
-        $order->setTotal($totalOrder + $carrier->getPrice());
-
-        $entityManager->persist($order);
         $entityManager->flush();
 
-        $cartService->clear();
+        // Stats après flush : évite de flusher un Order encore "new" dans l'UnitOfWork
+        $productStatsManager->recordPurchases($purchaseStats);
+
+        $cartHandler->clear();
 
         $this->addFlash('success', 'Commande #' . $order->getId() . ' confirmée avec succès !');
         return $this->redirectToRoute('app_profile_order_show', ['id' => $order->getId()]);
