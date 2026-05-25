@@ -1,24 +1,64 @@
-# 🌿 Minimalist Store (Symfony 7)
+# Minimalist Store — Symfony 8
 
-Une plateforme e-commerce épurée axée sur l'essentiel : performance, design minimaliste et architecture robuste.
+Plateforme e-commerce construite avec Symfony 8. Architecture orientée services, panier en session, classement produits par score de popularité.
 
-## 🚀 Stack Technique
-- **Framework :** Symfony 7 (PHP 8.2+)
-- **Base de données :** MySQL 8
-- **Frontend :** Twig & Tailwind CSS (CDN)
-- **Icons :** Google Material Symbols
+---
 
-## 🛠️ Fonctionnalités actuelles
-- [x] **Catalogue :** Filtrage par catégorie, fiches produits dynamiques (Images générées via Picsum).
-- [x] **Auth :** Inscription, Connexion, Sécurité native (Argon2id).
-- [x] **Panier :** Gestion en session via un `CartService` dédié (Complexité O(1)).
-- [x] **Commandes :** Système de "Snapshot" (historisation immuable du prix et du nom du produit).
-- [x] **Profil :** Dashboard utilisateur, historique des commandes et détails de facturation.
+## Stack
 
-## ⚙️ Installation
-1. `composer install`
-2. Configurer le `.env.local` (ajuster `DATABASE_URL`)
-3. `php bin/console doctrine:database:create`
-4. `php bin/console doctrine:migrations:migrate`
-5. `php bin/console doctrine:fixtures:load --append` *(Pour générer le catalogue de test)*
-6. `symfony server:start`
+| Couche | Technologie |
+|---|---|
+| Framework | Symfony 8.0 (PHP 8.2+) |
+| Base de données | MySQL 8 |
+| ORM | Doctrine |
+| Templates | Twig + Tailwind CSS (CDN) |
+| Infra | Docker (Nginx + PHP-FPM + MySQL) |
+
+---
+
+## Fonctionnalités
+
+- **Catalogue** — Filtrage par catégorie, tri dynamique (popularité, prix, achats, vues)
+- **Popularité** — Score pondéré calculé automatiquement à partir des vues, ajouts au panier et achats (`ProductStats`)
+- **Boost éditorial** — Flag `isTop` gérable depuis le back-office admin
+- **Panier** — Géré en session via `CartHandler` (pattern Strategy, SOLID)
+- **Commandes** — Snapshot du prix et du nom produit au moment de l'achat (historisation immuable)
+- **Auth** — Inscription, connexion (`form_login`), hachage Argon2id
+- **Profil** — Dashboard utilisateur, historique des commandes paginé
+
+→ Détail des logiques de ranking : [`docs/FEATURES.md`](docs/FEATURES.md)
+
+---
+
+## Installation
+
+### Avec Docker (recommandé)
+
+```bash
+docker compose up -d
+docker compose exec php composer install
+docker compose exec php php bin/console doctrine:migrations:migrate --no-interaction
+docker compose exec php php bin/console doctrine:fixtures:load --no-interaction
+```
+
+L'application est accessible sur `http://localhost`.
+
+### Sans Docker
+
+```bash
+composer install
+# Configurer DATABASE_URL dans .env.local
+php bin/console doctrine:database:create
+php bin/console doctrine:migrations:migrate --no-interaction
+php bin/console doctrine:fixtures:load --no-interaction
+symfony server:start
+```
+
+---
+
+## Comptes de test (fixtures)
+
+| Email | Mot de passe | Rôle |
+|---|---|---|
+| `admin@ecommerce.com` | `Admin123!` | ROLE_ADMIN |
+| `client@test.com` | `Client123!` | ROLE_USER |
