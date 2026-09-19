@@ -319,6 +319,12 @@ partielle.
 
 ---
 
+## Licence
+
+Distribué sous licence [MIT](LICENSE) — © 2026 Ayman NABIH.
+
+---
+
 ## Auteur
 
 **Ayman NABIH**
